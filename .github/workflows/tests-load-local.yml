@@ -1,4 +1,4 @@
-name: Remote Mode load test
+name: Local Mode load test
 
 on:
   schedule:
@@ -6,23 +6,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  remote-test:
+  local-test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js (optional, only if required)
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Run test-load script for remote workflow
+      - name: Run test-load script for local workflow
         working-directory: signify-ts-test/
         env:
-          REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
           BANK_COUNT: ${{ vars.BANK_COUNT }}
         run: |
           chmod +x test-load.sh
-          ./test-load.sh --mode remote --bank-count $BANK_COUNT --api-url $REMOTE_API_URL
+          ./test-load.sh --mode local --bank-count $BANK_COUNT
