@@ -22,6 +22,7 @@ jobs:
         working-directory: signify-ts-test/
         env:
           REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
+          FIRST_BANK: ${{ vars.FIRST_BANK }}
           BANK_COUNT: ${{ vars.BANK_COUNT }}
         run: |
           chmod +x test-load.sh
