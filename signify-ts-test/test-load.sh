@@ -4,7 +4,9 @@ KERIA_IMAGE_REPO="ronakseth96/keria"
 DOCKER_COMPOSE_FILE="docker-compose-banktest.yaml"
 MODE=""
 BANK_COUNT=0
+FIRST_BANK=1
 REG_PILOT_API=""
+START_TIME=$(date +%s) 
 
 usage() {
     echo "---------------------------------------------"
@@ -15,8 +17,12 @@ usage() {
     echo "                  - 'local': Docker-based testing."
     echo "                  - 'remote': Remote-services-based testing."
     echo ""
+    echo "  --start-bank    The bank number to start testing from (default: 1)."
+    echo "                  - Specify the starting bank number (e.g., 5 for Bank_5)."
+    echo ""
     echo "  --bank-count    Number of banks to test:"
     echo "                  - Specify the count (e.g., 1 for Bank_1, 10 for Bank_1 to Bank_10)."
+    echo "                  - If specifying start-bank, then specify the count (e.g., 5 for Bank_5 to Bank_9)."
     echo ""
     echo "  --api-url       (Required for 'remote' mode)"
     echo "                  API URL of the reg-pilot-api service (e.g., https://api.example.com)."
@@ -42,6 +48,10 @@ parse_args() {
         case $1 in
             --mode)
                 MODE="$2"
+                shift
+                ;;
+            --start-bank)
+                FIRST_BANK="$2"
                 shift
                 ;;
             --bank-count)
@@ -166,7 +176,7 @@ load_test_banks() {
     SUCCESS_COUNT=0
     FAILURE_COUNT=0
 
-    for ((i = 1; i <= BANK_COUNT; i++)); do
+    for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
         BANK_NAME="Bank_$i"
         export BANK_NAME
         BANK_KERIA_IMAGE="$KERIA_IMAGE_REPO:Test$BANK_NAME"
@@ -193,12 +203,16 @@ load_test_banks() {
         stop_services_local
     fi
 
+    END_TIME=$(date +%s)
+    ELAPSED_TIME=$((END_TIME - START_TIME))
+
     echo "================================="
     echo "           TEST SUMMARY          "
     echo "================================="
     echo "TOTAL BANKS TESTED: $BANK_COUNT"
     echo "SUCCESS COUNT: $SUCCESS_COUNT"
     echo "FAILURE COUNT: $FAILURE_COUNT"
+    echo "TOTAL RUNTIME: $((ELAPSED_TIME / 3600))h:$((ELAPSED_TIME % 3600 / 60))m:$((ELAPSED_TIME % 60))s"
     echo "================================="
 }
 
