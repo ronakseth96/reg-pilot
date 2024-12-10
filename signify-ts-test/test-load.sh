@@ -17,19 +17,21 @@ usage() {
     echo "                  - 'local': Docker-based testing."
     echo "                  - 'remote': Remote-services-based testing."
     echo ""
-    echo "  --start-bank    The bank number to start testing from (default: 1)."
+    echo "  --first-bank    The bank number to start testing from (default: 1)."
     echo "                  - Specify the starting bank number (e.g., 5 for Bank_5)."
     echo ""
     echo "  --bank-count    Number of banks to test:"
     echo "                  - Specify the count (e.g., 1 for Bank_1, 10 for Bank_1 to Bank_10)."
-    echo "                  - If specifying start-bank, then specify the count (e.g., 5 for Bank_5 to Bank_9)."
+    echo "                  - If specifying first-bank, then specify the count (e.g., 5 for Bank_5 to Bank_9)."
     echo ""
     echo "  --api-url       (Required for 'remote' mode)"
     echo "                  API URL of the reg-pilot-api service (e.g., https://api.example.com)."
     echo ""
     echo "Examples:"
     echo "  $0 --mode local --bank-count 5"
+    echo "  $0 --mode local --first-bank 1 --bank-count 5"
     echo "  $0 --mode remote --bank-count 10 --api-url https://reg-api-test.rootsid.cloud"
+    echo "  $0 --mode remote --first-bank 1 --bank-count 10 --api-url https://reg-api-test.rootsid.cloud"
     echo "---------------------------------------------"
     exit 1
 }
@@ -50,7 +52,7 @@ parse_args() {
                 MODE="$2"
                 shift
                 ;;
-            --start-bank)
+            --first-bank)
                 FIRST_BANK="$2"
                 shift
                 ;;
@@ -113,8 +115,7 @@ parse_args() {
     }
 
 check_available_banks() {
-    LAST_BANK=$((FIRST_BANK + BANK_COUNT - 1))
-    local TOTAL_AVAILABLE_BANKS=375
+    local TOTAL_AVAILABLE_BANKS=400
 
     if [[ "$BANK_COUNT" -gt "$TOTAL_AVAILABLE_BANKS" ]]; then
         echo "WARNING: You have selected more banks ($BANK_COUNT) than available ($TOTAL_AVAILABLE_BANKS)."
@@ -176,6 +177,8 @@ run_bank_test_workflow() {
 load_test_banks() {
     SUCCESS_COUNT=0
     FAILURE_COUNT=0
+
+    LAST_BANK=$((FIRST_BANK + BANK_COUNT - 1))
 
     for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
         BANK_NAME="Bank_$i"
