@@ -113,6 +113,7 @@ parse_args() {
     }
 
 check_available_banks() {
+    LAST_BANK=$((FIRST_BANK + BANK_COUNT - 1))
     local TOTAL_AVAILABLE_BANKS=375
 
     if [[ "$BANK_COUNT" -gt "$TOTAL_AVAILABLE_BANKS" ]]; then
