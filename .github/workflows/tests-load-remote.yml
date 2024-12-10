@@ -25,4 +25,4 @@ jobs:
           BANK_COUNT: ${{ vars.BANK_COUNT }}
         run: |
           chmod +x test-load.sh
-          ./test-load.sh --mode remote --start-bank $START_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL
+          ./test-load.sh --mode remote --first-bank $FIRST_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL
