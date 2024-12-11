@@ -21,7 +21,8 @@ jobs:
       - name: Run test-load script for local workflow
         working-directory: signify-ts-test/
         env:
+          FIRST_BANK: ${{ vars.FIRST_BANK }}
           BANK_COUNT: ${{ vars.BANK_COUNT }}
         run: |
           chmod +x test-load.sh
-          ./test-load.sh --mode local --bank-count $BANK_COUNT
+          ./test-load.sh --mode local --first-bank $FIRST_BANK --bank-count $BANK_COUNT
