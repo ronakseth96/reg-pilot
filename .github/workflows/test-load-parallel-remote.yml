@@ -1,3 +1,4 @@
+name: Remote Mode load test
 on:
   workflow_dispatch:
 
@@ -16,7 +17,7 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Run test-load-parallel script for the staging process 
+      - name: Run test-load-parallel script for the staging process
         working-directory: signify-ts-test/
         # env:
         #   REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
