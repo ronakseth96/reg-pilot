@@ -24,7 +24,9 @@ jobs:
       - name: Install Docker (for macOS)
         run: |
           brew install --cask docker
-          open -a Docker 
+          if [ -d "/Applications/Docker.app" ]; then
+          echo "Docker app found, opening it..."
+          open /Applications/Docker.app || echo "Unable to open Docker."
           echo "Waiting for Docker to start..."
 
           retries=10
@@ -41,6 +43,10 @@ jobs:
 
           if [ $retries -eq 0 ]; then
             echo "Docker daemon failed to start. Exiting."
+            exit 1
+          fi
+          else
+            echo "Docker app not found in /Applications. Please verify the installation."
             exit 1
           fi
 
