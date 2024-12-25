@@ -24,7 +24,9 @@ jobs:
       - name: Install Docker (for macOS)
         run: |
           brew install --cask docker
-          open -a Docker  # Open Docker Desktop
+          sudo /Applications/Docker.app/Contents/MacOS/Docker --quit-after-install --unattended || true
+          nohup /Applications/Docker.app/Contents/MacOS/Docker --unattended &
+          # open -a Docker
           echo "Waiting for Docker to start..."
 
           # Retry logic for Docker initialization
@@ -52,20 +54,12 @@ jobs:
           npm ci
 
       - name: Run test-load-parallel script for the staging process
-        # env:
-        #   REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
-        #   FIRST_BANK: ${{ vars.FIRST_BANK }}
-        #   BANK_COUNT: ${{ vars.BANK_COUNT }}
         run: |
           chmod +x test-load-parallel.sh
           ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 5 --api-url https://reg-api-test.rootsid.cloud --stage
 
       - name: Run test-load script for remote workflow
         if: success()
-        # env:
-        #   REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
-        #   FIRST_BANK: ${{ vars.FIRST_BANK }}
-        #   BANK_COUNT: ${{ vars.BANK_COUNT }}
         run: |
           chmod +x test-load-parallel.sh
           ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 5 --batch-size 2 --api-url https://reg-api-test.rootsid.cloud --fast
