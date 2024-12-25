@@ -50,9 +50,12 @@ jobs:
           #   exit 1
           # fi
           brew install --cask docker
-          sudo /Applications/Docker.app/Contents/MacOS/Docker --unattended --install-privileged-components
-          open -a /Applications/Docker.app --args --unattended --accept-license
-          while ! /Applications/Docker.app/Contents/Resources/bin/docker info &>/dev/null; do sleep 1; done
+          docker_app_path=$(brew list --cask docker | grep '==> App' -A1 | tail -n 1 | awk '{ print $1 }')
+          docker_app_path="${docker_app_path/#\~/$HOME}"
+
+          sudo "$docker_app_path"/Contents/MacOS/Docker --unattended --install-privileged-components
+          open -a "$docker_app_path" --args --unattended --accept-license
+          while ! "$docker_app_path"/Contents/Resources/bin/docker info &>/dev/null; do sleep 1; done
           docker --version
 
       - name: Install dependencies
