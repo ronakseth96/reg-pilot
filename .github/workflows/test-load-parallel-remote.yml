@@ -1,0 +1,40 @@
+on:
+  # schedule:
+  #   - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  remote-test:
+    runs-on: ubuntu-latest
+    # outputs:
+    #   staging-dir: ${{ steps.staging.outputs.staging-dir }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run test-load-parallel script for the staging process 
+        working-directory: signify-ts-test/
+        # env:
+        #   REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
+        #   FIRST_BANK: ${{ vars.FIRST_BANK }}
+        #   BANK_COUNT: ${{ vars.BANK_COUNT }}
+        run: |
+          chmod +x test-load-parallel.sh
+          ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 5 --api-url https://reg-api-test.rootsid.cloud --stage
+
+      - name: Run test-load script for remote workflow
+        if: success() # Only run if previous step was successful
+        working-directory: signify-ts-test/
+        # env:
+        #   REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
+        #   FIRST_BANK: ${{ vars.FIRST_BANK }}
+        #   BANK_COUNT: ${{ vars.BANK_COUNT }}
+        run: |
+          chmod +x test-load-parallel.sh
+          ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 5 --batch-size 2 --api-url https://reg-api-test.rootsid.cloud --fast
