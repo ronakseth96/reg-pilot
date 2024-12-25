@@ -23,32 +23,37 @@ jobs:
 
       - name: Install Docker (for macOS)
         run: |
+          # brew install --cask docker
+          # if [ -d "/Applications/Docker.app" ]; then
+          # echo "Docker app found, opening it..."
+          # open /Applications/Docker.app || echo "Unable to open Docker."
+          # echo "Waiting for Docker to start..."
+
+          # retries=10
+          # while [ $retries -gt 0 ]; do
+          #   if docker ps >/dev/null 2>&1; then
+          #     echo "Docker is ready!"
+          #     break
+          #   else
+          #     echo "Waiting for Docker daemon to start... $retries retries left"
+          #     retries=$((retries - 1))
+          #     sleep 10
+          #   fi
+          # done
+
+          # if [ $retries -eq 0 ]; then
+          #   echo "Docker daemon failed to start. Exiting."
+          #   exit 1
+          # fi
+          # else
+          #   echo "Docker app not found in /Applications. Please verify the installation."
+          #   exit 1
+          # fi
           brew install --cask docker
-          if [ -d "/Applications/Docker.app" ]; then
-          echo "Docker app found, opening it..."
-          open /Applications/Docker.app || echo "Unable to open Docker."
-          echo "Waiting for Docker to start..."
-
-          retries=10
-          while [ $retries -gt 0 ]; do
-            if docker ps >/dev/null 2>&1; then
-              echo "Docker is ready!"
-              break
-            else
-              echo "Waiting for Docker daemon to start... $retries retries left"
-              retries=$((retries - 1))
-              sleep 10
-            fi
-          done
-
-          if [ $retries -eq 0 ]; then
-            echo "Docker daemon failed to start. Exiting."
-            exit 1
-          fi
-          else
-            echo "Docker app not found in /Applications. Please verify the installation."
-            exit 1
-          fi
+          sudo /Applications/Docker.app/Contents/MacOS/Docker --unattended --install-privileged-components
+          open -a /Applications/Docker.app --args --unattended --accept-license
+          while ! /Applications/Docker.app/Contents/Resources/bin/docker info &>/dev/null; do sleep 1; done
+          docker --version
 
       - name: Install dependencies
         run: |
