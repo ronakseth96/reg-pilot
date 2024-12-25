@@ -1,5 +1,8 @@
 name: Remote Mode load test
 on:
+  push:
+    branches:
+      - feature/load-test-parallel
   workflow_dispatch:
 
 jobs:
