@@ -24,26 +24,23 @@ jobs:
       - name: Install Docker (for macOS)
         run: |
           brew install --cask docker
-          sudo /Applications/Docker.app/Contents/MacOS/Docker --quit-after-install --unattended || true
-          nohup /Applications/Docker.app/Contents/MacOS/Docker --unattended &
-          # open -a Docker
+          open -a Docker 
           echo "Waiting for Docker to start..."
 
-          # Retry logic for Docker initialization
-          retries=5
+          retries=10
           while [ $retries -gt 0 ]; do
-            if docker --version; then
+            if docker ps >/dev/null 2>&1; then
               echo "Docker is ready!"
               break
             else
-              echo "Waiting for Docker to start... $retries retries left"
+              echo "Waiting for Docker daemon to start... $retries retries left"
               retries=$((retries - 1))
-              sleep 10 
+              sleep 10
             fi
           done
 
           if [ $retries -eq 0 ]; then
-            echo "Docker failed to start after multiple retries. Exiting."
+            echo "Docker daemon failed to start. Exiting."
             exit 1
           fi
 
