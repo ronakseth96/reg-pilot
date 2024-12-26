@@ -143,8 +143,8 @@ validate_inputs() {
 
     if [[ "$FAST_MODE" == true ]]; then
         echo "FAST MODE: Ensure that all reports and Dockerfiles are staged and ready to run API tests."
-        read -p "Proceed with FAST MODE? (y/n): " confirm
-        if [[ "$confirm" = "y" ]]; then
+        # read -p "Proceed with FAST MODE? (y/n): " confirm
+        # if [[ "$confirm" = "y" ]]; then
 
             echo "Validating if API test Docker image exists locally..."
             LAST_BANK=$((FIRST_BANK + BANK_COUNT - 1))
