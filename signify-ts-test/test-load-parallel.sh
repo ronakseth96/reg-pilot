@@ -10,7 +10,6 @@ FAST_MODE=false
 STAGE_MODE=false
 EBA=""
 
-
 usage() {
     echo "---------------------------------------------------------------------------------------"
     echo "usage: $0 --mode [local|remote] --bank-count [COUNT] [--first-bank FIRST] [--batch-size SIZE] [--api-url URL] [--eba] [--stage] | [--fast]"
@@ -327,7 +326,7 @@ build_api_docker_image() {
         docker build --platform linux/amd64 -f $BANK_DOCKERFILE -t $BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1 
     else 
         # GitHub Actions: Build and push to GHCR
-        docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t ghcr.io/ronakseth96/bank_api_test_images:$BANK_IMAGE_TAG . --push > "$LOG_FILE" 2>&1
+        docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t ghcr.io/ronakseth96/bank_api_test_images:$BANK_IMAGE_TAG ../ --push > "$LOG_FILE" 2>&1
     fi
 
     BUILD_STATUS=$?
