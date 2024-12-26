@@ -146,10 +146,11 @@ validate_inputs() {
         # read -p "Proceed with FAST MODE? (y/n): " confirm
         # if [[ "$confirm" = "y" ]]; then
 
+            if [[ -z "$GITHUB_ACTIONS" ]]; then
+            # Check for images locally
             echo "Validating if API test Docker image exists locally..."
-            LAST_BANK=$((FIRST_BANK + BANK_COUNT - 1))
             for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
-                BANK_NAME="Bank_${i}"
+                BANK_NAME="Bank_$i"
                 BANK_IMAGE_TAG="$(echo "$BANK_NAME" | tr '[:upper:]' '[:lower:]')_api_test:latest"
 
                 if ! docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "^${BANK_IMAGE_TAG}$"; then
@@ -158,6 +159,21 @@ validate_inputs() {
                 fi
             done
             echo "All Docker images validated successfully."
+        else
+            # Check for images in GHCR
+            for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
+                BANK_NAME="Bank_$i"
+                BANK_IMAGE_TAG="$(echo "$BANK_NAME" | tr '[:upper:]' '[:lower:]')_api_test:latest"
+                IMAGE_NAME="ghcr.io/ronakseth96/bank_api_test_images:$BANK_IMAGE_TAG" 
+
+                if ! docker image inspect "$IMAGE_NAME" &> /dev/null; then 
+                    echo "Image '$IMAGE_NAME' not found in GHCR."
+                    echo "Exiting due to missing Docker images. Rerun the staging process again to create missing images."
+                    exit 1
+                fi
+            done
+            echo "All Docker images validated successfully in GHCR."
+            fi
         # else
         #     echo "Exiting. Rerun with --stage if prerequisites are missing."
         #     exit 1
