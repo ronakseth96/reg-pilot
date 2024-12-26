@@ -45,7 +45,6 @@ function generateDockerfiles(
 
     const dockerfileContent = `
   # Use a base image with the correct platform
-  // FROM node:20-alpine AS base
   FROM --platform=linux/amd64 node:20-alpine AS base
   WORKDIR /signify-ts-test
   COPY ../signify-ts-test .
