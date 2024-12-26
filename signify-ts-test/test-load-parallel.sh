@@ -158,9 +158,9 @@ validate_inputs() {
                 fi
             done
             echo "All Docker images validated successfully."
-        else
-            echo "Exiting. Rerun with --stage if prerequisites are missing."
-            exit 1
+        # else
+        #     echo "Exiting. Rerun with --stage if prerequisites are missing."
+        #     exit 1
         # fi
     fi    
 }
