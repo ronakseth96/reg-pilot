@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  remote-test:
+  remote_stage:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -16,47 +16,17 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PAT }}
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-
-      # - name: Install Docker (for macOS)
-      #   run: |
-      #     # brew install --cask docker
-      #     # if [ -d "/Applications/Docker.app" ]; then
-      #     # echo "Docker app found, opening it..."
-      #     # open /Applications/Docker.app || echo "Unable to open Docker."
-      #     # echo "Waiting for Docker to start..."
-
-      #     # retries=10
-      #     # while [ $retries -gt 0 ]; do
-      #     #   if docker ps >/dev/null 2>&1; then
-      #     #     echo "Docker is ready!"
-      #     #     break
-      #     #   else
-      #     #     echo "Waiting for Docker daemon to start... $retries retries left"
-      #     #     retries=$((retries - 1))
-      #     #     sleep 10
-      #     #   fi
-      #     # done
-
-      #     # if [ $retries -eq 0 ]; then
-      #     #   echo "Docker daemon failed to start. Exiting."
-      #     #   exit 1
-      #     # fi
-      #     # else
-      #     #   echo "Docker app not found in /Applications. Please verify the installation."
-      #     #   exit 1
-      #     # fi
-      #     brew install --cask docker
-      #     docker_app_path=$(brew list --cask docker | grep '==> App' -A1 | tail -n 1 | awk '{ print $1 }')
-      #     docker_app_path="${docker_app_path/#\~/$HOME}"
-
-      #     sudo "$docker_app_path"/Contents/MacOS/Docker --unattended --install-privileged-components
-      #     open -a "$docker_app_path" --args --unattended --accept-license
-      #     while ! "$docker_app_path"/Contents/Resources/bin/docker info &>/dev/null; do sleep 1; done
-      #     docker --version
 
       - name: Install dependencies
         run: |
@@ -64,12 +34,41 @@ jobs:
           npm set registry https://registry.npmjs.org/
           npm ci
 
-      - name: Run test-load-parallel script for the staging process
+      - name: Run the staging process
         run: |
           chmod +x test-load-parallel.sh
           ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 5 --api-url https://reg-api-test.rootsid.cloud --stage
 
-      - name: Run test-load script for remote workflow
-        if: success()
+  remote_fast:
+    needs: remote_stage
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: signify-ts-test/
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
         run: |
+          npm cache clean --force
+          npm set registry https://registry.npmjs.org/
+          npm ci
+
+      - name: Run test-load-parallel script in fast mode
+        run: |
+          chmod +x test-load-parallel.sh
           ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 5 --batch-size 2 --api-url https://reg-api-test.rootsid.cloud --fast

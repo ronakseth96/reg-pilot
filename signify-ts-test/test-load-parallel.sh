@@ -10,6 +10,7 @@ FAST_MODE=false
 STAGE_MODE=false
 EBA=""
 
+
 usage() {
     echo "---------------------------------------------------------------------------------------"
     echo "usage: $0 --mode [local|remote] --bank-count [COUNT] [--first-bank FIRST] [--batch-size SIZE] [--api-url URL] [--eba] [--stage] | [--fast]"
@@ -316,20 +317,27 @@ build_api_docker_image() {
     fi
 
     echo "---------------------------------------------------"
-    echo "Building Docker image for $BANK_NAME..."
+    echo "Building and Pushing Docker image for $BANK_NAME..."
     echo "---------------------------------------------------"
     LOG_FILE="./bank_test_logs/docker_build_logs/$BANK_NAME-build.log"
     mkdir -p $(dirname "$LOG_FILE") 
-    docker build --platform linux/amd64 -f $BANK_DOCKERFILE -t $BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
+
+    if [[ -z "$GITHUB_ACTIONS" ]]; then 
+        # Local execution: Build image locally
+        docker build --platform linux/amd64 -f $BANK_DOCKERFILE -t $BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1 
+    else 
+        # GitHub Actions: Build and push to GHCR
+        docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t ghcr.io/ronakseth96/bank_api_test_images:$BANK_IMAGE_TAG . --push > "$LOG_FILE" 2>&1
+    fi
 
     BUILD_STATUS=$?
     if [[ $BUILD_STATUS -ne 0 ]]; then
-        echo "Error: Building Docker image for $BANK_NAME failed. See $LOG_FILE for details."
+        echo "Error: Building and pushing Docker image for $BANK_NAME failed. See $LOG_FILE for details."
         tail -n 25 "$LOG_FILE"
         exit 1
     fi
 
-    echo "Docker image for $BANK_NAME built successfully."
+    echo "Docker image for $BANK_NAME built and pushed successfully."
     }
 
 run_api_test() {
@@ -342,7 +350,7 @@ run_api_test() {
     docker rm -f "$BANK_IMAGE_TAG" > /dev/null 2>&1
 
     echo "Running API test for $BANK_NAME..."
-    docker run --network host --name $BANK_IMAGE_TAG $BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
+    docker run --network host --name $BANK_IMAGE_TAG ghcr.io/ronakseth96/bank_api_test_images:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
 
     API_TEST_STATUS=$?
     if [[ $API_TEST_STATUS -ne 0 ]]; then
