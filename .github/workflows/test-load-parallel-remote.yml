@@ -72,5 +72,4 @@ jobs:
       - name: Run test-load script for remote workflow
         if: success()
         run: |
-          chmod +x test-load-parallel.sh
           ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 5 --batch-size 2 --api-url https://reg-api-test.rootsid.cloud --fast

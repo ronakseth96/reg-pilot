@@ -320,7 +320,7 @@ build_api_docker_image() {
     echo "---------------------------------------------------"
     LOG_FILE="./bank_test_logs/docker_build_logs/$BANK_NAME-build.log"
     mkdir -p $(dirname "$LOG_FILE") 
-    docker build --platform linux/arm64 -f $BANK_DOCKERFILE -t $BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
+    docker build --platform linux/amd64 -f $BANK_DOCKERFILE -t $BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
 
     BUILD_STATUS=$?
     if [[ $BUILD_STATUS -ne 0 ]]; then
