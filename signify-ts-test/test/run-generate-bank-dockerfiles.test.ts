@@ -37,8 +37,10 @@ function generateDockerfiles(
   const lastbank = firstbank + bankAmount - 1;
   for (let i = firstbank; i <= lastbank; i++) {
     const bankName = `Bank_${i}`;
-    const keriaUrl = `http://host.docker.internal:${baseKeriaUrl + (i - 1) * 10}`;
-    const keriaBootUrl = `http://host.docker.internal:${baseKeriaBootUrl + (i - 1) * 10}`;
+    // const keriaUrl = `http://host.docker.internal:${baseKeriaUrl + (i - 1) * 10}`;
+    // const keriaBootUrl = `http://host.docker.internal:${baseKeriaBootUrl + (i - 1) * 10}`;
+    const keriaUrl = `http://127.0.0.1:${baseKeriaUrl + (i - 1) * 10}`;
+    const keriaBootUrl = `http://127.0.0.1:${baseKeriaBootUrl + (i - 1) * 10}`;
     const apiBaseUrl = process.env.REG_PILOT_API;
 
     const dockerfileContent = `
