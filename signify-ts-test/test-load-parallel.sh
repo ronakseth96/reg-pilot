@@ -370,7 +370,7 @@ run_api_test() {
     API_TEST_STATUS=$?
     if [[ $API_TEST_STATUS -ne 0 ]]; then
         echo "API test for $BANK_NAME failed. See $LOG_FILE for details."
-        tail -n 25 "$LOG_FILE"
+        tail -n 45 "$LOG_FILE"
         return 1
     else
         echo "API test for $BANK_NAME completed successfully."
@@ -463,54 +463,54 @@ load_test_banks() {
         echo "-----------------------------------------------------------------------------------------------------------"
     fi
 
-    while [[ ${#FAILED_BANKS[@]} -gt 0 && $RETRY_COUNT -lt $MAX_RETRIES ]]; do
-        echo "Retrying failed banks (Attempt $((RETRY_COUNT + 1))/${MAX_RETRIES})..."
-        RETRY_COUNT=$((RETRY_COUNT + 1))
-        FAILED_BANKS=($(printf "%s\n" "${FAILED_BANKS[@]}" | sort -u))
-        NEW_FAILED_BANKS=()
+    # while [[ ${#FAILED_BANKS[@]} -gt 0 && $RETRY_COUNT -lt $MAX_RETRIES ]]; do
+    #     echo "Retrying failed banks (Attempt $((RETRY_COUNT + 1))/${MAX_RETRIES})..."
+    #     RETRY_COUNT=$((RETRY_COUNT + 1))
+    #     FAILED_BANKS=($(printf "%s\n" "${FAILED_BANKS[@]}" | sort -u))
+    #     NEW_FAILED_BANKS=()
 
-        # Process failed banks in batches
-        for ((BATCH_START = 0; BATCH_START < ${#FAILED_BANKS[@]}; BATCH_START += BATCH_SIZE)); do
-            BATCH_END=$((BATCH_START + BATCH_SIZE - 1))
-            if [[ $BATCH_END -ge ${#FAILED_BANKS[@]} ]]; then
-                BATCH_END=$((${#FAILED_BANKS[@]} - 1))
-            fi
+    #     # Process failed banks in batches
+    #     for ((BATCH_START = 0; BATCH_START < ${#FAILED_BANKS[@]}; BATCH_START += BATCH_SIZE)); do
+    #         BATCH_END=$((BATCH_START + BATCH_SIZE - 1))
+    #         if [[ $BATCH_END -ge ${#FAILED_BANKS[@]} ]]; then
+    #             BATCH_END=$((${#FAILED_BANKS[@]} - 1))
+    #         fi
 
-            echo "-----------------------------------------------------------------------------------------------------------"
-            echo "Retrying processing banks ${FAILED_BANKS[@]:BATCH_START:BATCH_END - BATCH_START + 1}..."
-            echo "-----------------------------------------------------------------------------------------------------------"
+    #         echo "-----------------------------------------------------------------------------------------------------------"
+    #         echo "Retrying processing banks ${FAILED_BANKS[@]:BATCH_START:BATCH_END - BATCH_START + 1}..."
+    #         echo "-----------------------------------------------------------------------------------------------------------"
 
-            # Retries for failed banks in the current batch
-            PIDS=()
-            for ((i = BATCH_START; i <= BATCH_END; i++)); do
-                BANK_NAME="${FAILED_BANKS[$i]}"
-                run_api_test "$BANK_NAME" &
-                PIDS+=($!)
-            done
+    #         # Retries for failed banks in the current batch
+    #         PIDS=()
+    #         for ((i = BATCH_START; i <= BATCH_END; i++)); do
+    #             BANK_NAME="${FAILED_BANKS[$i]}"
+    #             run_api_test "$BANK_NAME" &
+    #             PIDS+=($!)
+    #         done
 
-            # Wait for all retry processes in the current batch to finish
-            for pid in "${!PIDS[@]}"; do
-                wait "${PIDS[$pid]}"
-                API_TEST_STATUS=$?
-                if [[ $API_TEST_STATUS -eq 0 ]]; then
-                    SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-                else
-                    FAILURE_COUNT=$((FAILURE_COUNT + 1))
-                    NEW_FAILED_BANKS+=("${FAILED_BANKS[$BATCH_START + pid]}")
-                fi
-            done
-        done
+    #         # Wait for all retry processes in the current batch to finish
+    #         for pid in "${!PIDS[@]}"; do
+    #             wait "${PIDS[$pid]}"
+    #             API_TEST_STATUS=$?
+    #             if [[ $API_TEST_STATUS -eq 0 ]]; then
+    #                 SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+    #             else
+    #                 FAILURE_COUNT=$((FAILURE_COUNT + 1))
+    #                 NEW_FAILED_BANKS+=("${FAILED_BANKS[$BATCH_START + pid]}")
+    #             fi
+    #         done
+    #     done
 
-        FAILED_BANKS=("${NEW_FAILED_BANKS[@]}")
-    done
+    #     FAILED_BANKS=("${NEW_FAILED_BANKS[@]}")
+    # done
 
-    if [[ ${#FAILED_BANKS[@]} -gt 0 ]]; then
-    echo "-----------------------------------------------------------------------------------------------------------"
-    echo "Failed Bank(s) after all retry attempts: ${FAILED_BANKS[@]}"
-    echo "-----------------------------------------------------------------------------------------------------------"
-    fi
+    # if [[ ${#FAILED_BANKS[@]} -gt 0 ]]; then
+    # echo "-----------------------------------------------------------------------------------------------------------"
+    # echo "Failed Bank(s) after all retry attempts: ${FAILED_BANKS[@]}"
+    # echo "-----------------------------------------------------------------------------------------------------------"
+    # fi
     
-    FAILURE_COUNT=${#FAILED_BANKS[@]}
+    # FAILURE_COUNT=${#FAILED_BANKS[@]}
 
     END_TIME=$(date +%s)
     ELAPSED_TIME=$((END_TIME - START_TIME))
