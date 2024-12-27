@@ -365,7 +365,7 @@ run_api_test() {
     docker rm -f "$BANK_IMAGE_TAG" > /dev/null 2>&1
 
     echo "Running API test for $BANK_NAME..."
-    docker run --network host --name $BANK_IMAGE_TAG ghcr.io/ronakseth96/bank_api_test_images:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
+    docker run --network host --name $BANK_IMAGE_TAG ghcr.io/ronakseth96/bank_api_test_images/$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
 
     API_TEST_STATUS=$?
     if [[ $API_TEST_STATUS -ne 0 ]]; then
