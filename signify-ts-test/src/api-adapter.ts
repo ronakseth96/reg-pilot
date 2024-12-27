@@ -155,7 +155,82 @@ export class ApiAdapter {
     );
   }
 
+  // public async addRootOfTrust(configJson: any): Promise<Response> {
+  //   const rootOfTrustMultisigIdentifierName = configJson.users
+  //     .filter(
+  //       (usr: any) => usr.type == "GLEIF" || usr.type == "GLEIF_EXTERNAL",
+  //     )[0]
+  //     .identifiers.filter((identifier: string) =>
+  //       identifier.includes("multisig"),
+  //     )![0];
+
+  //   const rootOfTrustIdentifierName = configJson.users
+  //     .filter(
+  //       (usr: any) => usr.type == "GLEIF" || usr.type == "GLEIF_EXTERNAL",
+  //     )[0]
+  //     .identifiers.filter(
+  //       (identifier: string) => !identifier.includes("multisig"),
+  //     )![0];
+
+  //   const rootOfTrustIdentifierAgent =
+  //     configJson.agents[
+  //       configJson.identifiers[rootOfTrustIdentifierName].agent
+  //     ];
+  //   const rootOfTrustIdentifierSecret =
+  //     configJson.secrets[rootOfTrustIdentifierAgent.secret];
+  //   const clients = await getOrCreateClients(
+  //     1,
+  //     [rootOfTrustIdentifierSecret],
+  //     true,
+  //   );
+  //   const client = clients[clients.length - 1];
+  //   const rootOfTrustAid = await client
+  //     .identifiers()
+  //     .get(rootOfTrustMultisigIdentifierName);
+
+  //   const oobi = await client
+  //     .oobis()
+  //     .get(rootOfTrustMultisigIdentifierName, "agent");
+  //   let oobiUrl = oobi.oobis[0];
+  //   const url = new URL(oobiUrl);
+  //   if (url.hostname === "keria")
+  //     oobiUrl = oobiUrl.replace("keria", "localhost");
+  //   console.log(`Root of trust OOBI: ${oobiUrl}`);
+  //   // console.log(`OobiUrl: ${oobiUrl}`);
+  //   // if (url.hostname === "keria")
+  //   //   oobiUrl = oobiUrl.replace("keria", "host.docker.internal");
+  //   // if (process.env.KERIA_AGENT_PORT) {
+  //   //   oobiUrl = oobiUrl.replace("3902", process.env.KERIA_AGENT_PORT);
+  //   // }
+  //   // console.log(`OobiUrl: ${oobiUrl}`);
+  //   const oobiResp = await fetch(oobiUrl);
+  //   const oobiRespBody = await oobiResp.text();
+  //   const heads = new Headers();
+  //   heads.set("Content-Type", "application/json");
+  //   let lbody = {
+  //     vlei: oobiRespBody,
+  //     aid: rootOfTrustAid.prefix,
+  //     oobi: oobiUrl,
+  //   };
+  //   let lreq = {
+  //     headers: heads,
+  //     method: "POST",
+  //     body: JSON.stringify(lbody),
+  //   };
+  //   const lurl = `${this.apiBaseUrl}/add_root_of_trust`;
+  //   const lresp = await fetch(lurl, lreq);
+  //   return lresp;
+  // }
+
   public async addRootOfTrust(configJson: any): Promise<Response> {
+    if (this.hasGLEIFWithMultisig(configJson)) {
+      return await this.addRootOfTrustMultisig(configJson);
+    } else {
+      return await this.addRootOfTrustSinglesig(configJson);
+    }
+  }
+
+  public async addRootOfTrustMultisig(configJson: any): Promise<Response> {
     const rootOfTrustMultisigIdentifierName = configJson.users
       .filter(
         (usr: any) => usr.type == "GLEIF" || usr.type == "GLEIF_EXTERNAL",
@@ -196,13 +271,6 @@ export class ApiAdapter {
     if (url.hostname === "keria")
       oobiUrl = oobiUrl.replace("keria", "localhost");
     console.log(`Root of trust OOBI: ${oobiUrl}`);
-    // console.log(`OobiUrl: ${oobiUrl}`);
-    // if (url.hostname === "keria")
-    //   oobiUrl = oobiUrl.replace("keria", "host.docker.internal");
-    // if (process.env.KERIA_AGENT_PORT) {
-    //   oobiUrl = oobiUrl.replace("3902", process.env.KERIA_AGENT_PORT);
-    // }
-    // console.log(`OobiUrl: ${oobiUrl}`);
     const oobiResp = await fetch(oobiUrl);
     const oobiRespBody = await oobiResp.text();
     const heads = new Headers();

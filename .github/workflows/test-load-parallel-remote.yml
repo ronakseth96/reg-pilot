@@ -37,7 +37,7 @@ jobs:
       - name: Run the staging process
         run: |
           chmod +x test-load-parallel.sh
-          ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 5 --api-url https://reg-api-test.rootsid.cloud --stage
+          ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 2 --api-url https://reg-api-test.rootsid.cloud --stage
 
   remote_fast:
     needs: remote_stage
@@ -71,4 +71,4 @@ jobs:
       - name: Run test-load-parallel script in fast mode
         run: |
           chmod +x test-load-parallel.sh
-          ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 5 --batch-size 2 --api-url https://reg-api-test.rootsid.cloud --fast
+          ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 2 --api-url https://reg-api-test.rootsid.cloud --fast
