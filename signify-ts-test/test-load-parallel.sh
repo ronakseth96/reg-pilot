@@ -160,19 +160,19 @@ validate_inputs() {
             done
             echo "All Docker images validated successfully."
         else
-            # Check for images in GHCR
+            # Check for images in Docker Hub
             for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
                 BANK_NAME="Bank_$i"
                 BANK_IMAGE_TAG="$(echo "$BANK_NAME" | tr '[:upper:]' '[:lower:]')_api_test:latest"
-                IMAGE_NAME="ghcr.io/ronakseth96/bank_api_test_images:$BANK_IMAGE_TAG" 
+                IMAGE_NAME="ronakseth96/bank_api_test:$BANK_IMAGE_TAG" 
 
-                if ! docker image inspect "$IMAGE_NAME" &> /dev/null; then 
-                    echo "Image '$IMAGE_NAME' not found in GHCR."
+                if ! docker manifest inspect "$IMAGE_NAME" &> /dev/null; then 
+                    echo "Image '$IMAGE_NAME' not found in Docker Hub."
                     echo "Exiting due to missing Docker images. Rerun the staging process again to create missing images."
                     exit 1
                 fi
             done
-            echo "All Docker images validated successfully in GHCR."
+            echo "All Docker images validated successfully in Docker Hub."
             fi
         # else
         #     echo "Exiting. Rerun with --stage if prerequisites are missing."
@@ -341,8 +341,8 @@ build_api_docker_image() {
         # Local execution: Build image locally
         docker build --platform linux/amd64 -f $BANK_DOCKERFILE -t $BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1 
     else 
-        # GitHub Actions: Build and push to GHCR
-        docker build --platform linux/amd64 -f $BANK_DOCKERFILE -t ghcr.io/ronakseth96/bank_api_test_images/$BANK_IMAGE_TAG ../ --push > "$LOG_FILE" 2>&1
+        # GitHub Actions: Build and push to Docker Hub
+        docker build --platform linux/amd64 -f $BANK_DOCKERFILE -t ronakseth96/bank_api_test/$BANK_IMAGE_TAG ../ --push > "$LOG_FILE" 2>&1
     fi
 
     BUILD_STATUS=$?
@@ -365,7 +365,7 @@ run_api_test() {
     docker rm -f "$BANK_IMAGE_TAG" > /dev/null 2>&1
 
     echo "Running API test for $BANK_NAME..."
-    docker run --network host --name $BANK_IMAGE_TAG ghcr.io/ronakseth96/bank_api_test_images/$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
+    docker run --network host --name $BANK_IMAGE_TAG ronakseth96/bank_api_test/$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
 
     API_TEST_STATUS=$?
     if [[ $API_TEST_STATUS -ne 0 ]]; then
