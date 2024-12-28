@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DOCKER_COMPOSE_FILE="docker-compose-banktest.yaml"
+BANK_API_TEST_REPO="ronakseth96/bank_api_test"
 MODE=""
 BANK_COUNT=0
 FIRST_BANK=1
@@ -315,7 +316,7 @@ generate_dockerfiles() {
     export BANK_COUNT=$BANK_COUNT
     export FIRST_BANK=$FIRST_BANK
     export EBA=$EBA
-    export REG_PILOT_API=$REG_PILOT_API
+    # export REG_PILOT_API=$REG_PILOT_API
     npx jest ./run-generate-bank-dockerfiles.test.ts --runInBand --forceExit
     check_status "Generating Dockerfiles for $FIRST_BANK to $((BANK_COUNT + FIRST_BANK)) bank(s), is EBA: $EBA"
 }
@@ -323,7 +324,7 @@ generate_dockerfiles() {
 build_api_docker_image() {
     BANK_NAME=$(echo "$BANK_NAME" | tr '[:upper:]' '[:lower:]')
     BANK_DOCKERFILE="../images/${BANK_NAME}.dockerfile"
-    BANK_IMAGE_TAG="${BANK_NAME}_api_test:latest"
+    BANK_IMAGE_TAG="${BANK_NAME}_api_test"
 
     # Check if the Dockerfile exists
     if [[ ! -f "$BANK_DOCKERFILE" ]]; then
@@ -339,10 +340,10 @@ build_api_docker_image() {
 
     if [[ -z "$GITHUB_ACTIONS" ]]; then 
         # Local execution: Build image locally
-        docker build --platform linux/amd64 -f $BANK_DOCKERFILE -t $BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1 
+        docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
     else 
         # GitHub Actions: Build and push to Docker Hub
-        docker build --platform linux/amd64 -f $BANK_DOCKERFILE -t ronakseth96/bank_api_test/$BANK_IMAGE_TAG ../ --push > "$LOG_FILE" 2>&1
+        docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ --push  > "$LOG_FILE" 2>&1
     fi
 
     BUILD_STATUS=$?
@@ -365,7 +366,19 @@ run_api_test() {
     docker rm -f "$BANK_IMAGE_TAG" > /dev/null 2>&1
 
     echo "Running API test for $BANK_NAME..."
-    docker run --network host --name $BANK_IMAGE_TAG ronakseth96/bank_api_test/$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
+    if [[ "$(uname)" == "Darwin" ]]; then
+        if [[ "$MODE" == "remote" ]]; then
+            docker run -e REG_PILOT_API="$REG_PILOT_API" --name $BANK_IMAGE_TAG $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
+        else
+            docker run --name $BANK_IMAGE_TAG $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
+        fi
+    else
+        if [[ "$MODE" == "remote" ]]; then
+            docker run --network host -e REG_PILOT_API="$REG_PILOT_API" --name $BANK_IMAGE_TAG $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
+        else    
+            docker run --network host --name $BANK_IMAGE_TAG $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
+        fi
+    fi
 
     API_TEST_STATUS=$?
     if [[ $API_TEST_STATUS -ne 0 ]]; then

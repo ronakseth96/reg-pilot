@@ -41,11 +41,11 @@ function generateDockerfiles(
     // const keriaBootUrl = `http://host.docker.internal:${baseKeriaBootUrl + (i - 1) * 10}`;
     const keriaUrl = `http://127.0.0.1:${baseKeriaUrl + (i - 1) * 10}`;
     const keriaBootUrl = `http://127.0.0.1:${baseKeriaBootUrl + (i - 1) * 10}`;
-    const apiBaseUrl = process.env.REG_PILOT_API;
+    // const apiBaseUrl = process.env.REG_PILOT_API;
 
     const dockerfileContent = `
   # Use a base image with the correct platform
-  FROM --platform=linux/amd64 node:20-alpine AS base
+  FROM node:20-alpine AS base
   WORKDIR /signify-ts-test
   COPY ../signify-ts-test .
   RUN npm i
@@ -55,7 +55,6 @@ function generateDockerfiles(
   ENV KERIA=${keriaUrl}
   ENV KERIA_BOOT=${keriaBootUrl}
   ENV KERIA_AGENT_PORT=${baseKeriaAgentPort + (i - 1) * 10} 
-  ENV REG_PILOT_API=${apiBaseUrl}
   
   CMD ["npx", "jest", "--testNamePattern", "${testName}", "start", "./test/run-workflow-bank-api.test.ts"]
   `;
