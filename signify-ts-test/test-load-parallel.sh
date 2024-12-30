@@ -152,7 +152,6 @@ validate_inputs() {
             exit 1
         fi
 
-            if [[ -z "$GITHUB_ACTIONS" ]]; then
             # Check for images locally
             echo "Validating if API test Docker image exists locally..."
             for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
@@ -166,7 +165,7 @@ validate_inputs() {
             done
             echo "All Docker images validated successfully."
             
-            else
+        else
             # Check for images in Docker Hub
             for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
                 BANK_NAME="Bank_$i"
