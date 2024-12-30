@@ -316,6 +316,9 @@ export class ApiAdapter {
     const url = new URL(oobiUrl);
     if (url.hostname === "keria")
       oobiUrl = oobiUrl.replace("keria", "localhost");
+    if (process.env.KERIA_AGENT_PORT) {
+      oobiUrl = oobiUrl.replace("3902", process.env.KERIA_AGENT_PORT);
+    }
     const oobiResp = await fetch(oobiUrl);
     const oobiRespBody = await oobiResp.text();
     const heads = new Headers();
