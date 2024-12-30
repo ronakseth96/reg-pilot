@@ -143,9 +143,14 @@ validate_inputs() {
     fi
 
     if [[ "$FAST_MODE" == true ]]; then
+
+        if [[ -z "$GITHUB_ACTIONS" ]]; then
         echo "FAST MODE: Ensure that all reports and Dockerfiles are staged and ready to run API tests."
-        # read -p "Proceed with FAST MODE? (y/n): " confirm
-        # if [[ "$confirm" = "y" ]]; then
+        read -p "Proceed with FAST MODE? (y/n): " confirm
+        if [[ "$confirm" != "y" ]]; then
+            echo "Exiting. Rerun with --stage if prerequisites are missing."
+            exit 1
+        fi
 
             if [[ -z "$GITHUB_ACTIONS" ]]; then
             # Check for images locally
@@ -160,7 +165,8 @@ validate_inputs() {
                 fi
             done
             echo "All Docker images validated successfully."
-        else
+            
+            else
             # Check for images in Docker Hub
             for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
                 BANK_NAME="Bank_$i"
@@ -174,11 +180,7 @@ validate_inputs() {
                 fi
             done
             echo "All Docker images validated successfully in Docker Hub."
-            fi
-        # else
-        #     echo "Exiting. Rerun with --stage if prerequisites are missing."
-        #     exit 1
-        # fi
+        fi
     fi    
 }
 
@@ -343,7 +345,7 @@ build_api_docker_image() {
         docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
     else 
         # GitHub Actions: Build and push to Docker Hub
-        docker build --platform linux/amd64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ --push  > "$LOG_FILE" 2>&1
+        docker buildx --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ --push  > "$LOG_FILE" 2>&1
     fi
 
     BUILD_STATUS=$?
