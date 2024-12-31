@@ -28,8 +28,8 @@ jobs:
       - name: Set up Docker buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          use: true
+        # with:
+        #   use: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -43,9 +43,13 @@ jobs:
           npm ci
 
       - name: Run the staging process
+        env:
+          FIRST_BANK: ${{ vars.FIRST_BANK }}
+          BANK_COUNT: ${{ vars.BANK_COUNT }}
+          REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
         run: |
           chmod +x test-load-parallel.sh
-          ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 2 --api-url https://reg-api-test.rootsid.cloud --stage
+          ./test-load-parallel.sh --mode remote --first-bank $FIRST_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL --stage
 
   remote_fast:
     needs: remote_stage
@@ -76,6 +80,10 @@ jobs:
           npm ci
 
       - name: Run test-load-parallel script in fast mode
+        env:
+          FIRST_BANK: ${{ vars.FIRST_BANK }}
+          BANK_COUNT: ${{ vars.BANK_COUNT }}
+          REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
         run: |
           chmod +x test-load-parallel.sh
-          ./test-load-parallel.sh --mode remote --first-bank 1 --bank-count 2 --api-url https://reg-api-test.rootsid.cloud --fast
+          ./test-load-parallel.sh --mode remote --first-bank $FIRST_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL --fast
