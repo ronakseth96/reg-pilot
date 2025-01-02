@@ -368,21 +368,24 @@ build_api_docker_image() {
 
     if [[ -z "$GITHUB_ACTIONS" ]]; then 
         # Local execution: Build image locally
-        docker build --platform linux/arm64 -f "$BANK_DOCKERFILE" -t "$BANK_API_TEST_REPO:$BANK_IMAGE_TAG" ../ > "$LOG_FILE" 2>&1
+        docker build --platform linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
         # docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
     else 
         # GitHub Actions: Build and push to Docker Hub
-        docker pull "$BANK_API_TEST_REPO:$BANK_IMAGE_TAG" > /dev/null 2>&1
+        docker pull $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > /dev/null 2>&1
+        # docker pull $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > /dev/null 2>&1
 
         # docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ --push  > "$LOG_FILE" 2>&1
 
         docker buildx build \
             --platform linux/amd64,linux/arm64 \
-            -f "$BANK_DOCKERFILE" \
-            --cache-from=type=registry,ref="$BANK_API_TEST_REPO:$BANK_IMAGE_TAG" \
-            --cache-to=type=registry,ref="$BANK_API_TEST_REPO:$BANK_IMAGE_TAG",mode=max \
-            -t "$BANK_API_TEST_REPO:$BANK_IMAGE_TAG" \
-            ../ --push > "$LOG_FILE" 2>&1
+            -f $BANK_DOCKERFILE \
+            --cache-from=type=registry,ref=$BANK_API_TEST_REPO:$BANK_IMAGE_TAG \
+            --cache-to=type=registry,ref=$BANK_API_TEST_REPO:$BANK_IMAGE_TAG,mode=max \
+            -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG \
+            ../ --push 2>&1 | tee "$LOG_FILE"
+
+            # ../ --push > "$LOG_FILE" 2>&1
     fi
 
     BUILD_STATUS=$?
@@ -445,7 +448,7 @@ run_api_test() {
                     --network host \
                     -e REG_PILOT_API="$REG_PILOT_API" \
                     -e REG_PILOT_FILER="$REG_PILOT_FILER" \
-                    --name $BANK_IMAGE_TAG $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
+                    --name "$BANK_IMAGE_TAG $BANK_API_TEST_REPO":$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
             fi
         else    
             docker run --network host --name $BANK_IMAGE_TAG $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
