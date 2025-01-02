@@ -700,7 +700,6 @@ export async function checkSignedUpload(
   const signedUpBody = await signedUpResp.json();
   assert.equal(signedUpBody["status"], "verified");
   assert.equal(signedUpBody["submitter"], `${user.ecrAid.prefix}`);
-  // const expectedEnding = `files in report package, submitted by ${user.ecrAid.prefix}, have been signed by known AIDs from the LEI ${ecrCred.sad.a.LEI}.`;
   const expectedEnding = `files in report package, submitted by ${user.ecrAid.prefix}, have been signed by known AIDs`;
   expect(signedUpBody["message"]).toMatch(new RegExp(`${expectedEnding}`));
 
@@ -762,7 +761,6 @@ export async function checkFailUpload(
     const failUpBody = await failUpResp.json();
     return true;
   } else if (fileName.includes("wrongAid")) {
-    // failMessage = "signature from AID that is not a known";
     failMessage = `signature from ${ecrAid.prefix} does not match the report signer`;
   }
 
@@ -906,7 +904,8 @@ async function ebaLogin(user: ApiUser, cred: any, credCesr: any) {
   console.log("eba login lreq", lreq);
   let lpath = `/signifyLogin`;
   const lresp = await fetch(
-    "https://errp.test.eba.europa.eu/api-security" + lpath,
+    // "https://errp.test.eba.europa.eu/api-security" + lpath,
+    env.apiBaseUrl + lpath,
     lreq,
   );
   console.log("login response", lresp);

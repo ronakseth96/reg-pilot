@@ -6,9 +6,17 @@ import { string } from "mathjs";
 
 export class ApiAdapter {
   apiBaseUrl: string;
-  constructor(apiBaseUrl: string) {
+  filerBaseUrl: string = "";
+  constructor(apiBaseUrl: string, filerBaseUrl: string) {
     this.apiBaseUrl = apiBaseUrl;
     // this.apiBaseUrl = apiBaseUrl.replace("127.0.0.1", "host.docker.internal");
+    if (!filerBaseUrl || filerBaseUrl === "") {
+      console.log("Filer base URL not provided. Using API base URL.");
+      this.filerBaseUrl = apiBaseUrl;
+    } else {
+      console.log(`Filer base URL provided ${filerBaseUrl}`);
+      this.filerBaseUrl = filerBaseUrl;
+    }
   }
 
   public async dropReportStatusByAid(
@@ -140,7 +148,9 @@ export class ApiAdapter {
         // 'host':'errp.test.eba.europa.eu'
       },
     };
-    const url = `https://errp.test.eba.europa.eu/api/upload`;
+    // const url = `https://errp.test.eba.europa.eu/api/upload`;
+    const url = `${this.filerBaseUrl}/upload`;
+    console.log(`EBA upload URL: ${url}`);
     let sreq = await client.createSignedRequest(aidName, url, req);
     // const sreqBod = await sreq.text();
     const resp = await fetch(url, sreq);
@@ -154,73 +164,6 @@ export class ApiAdapter {
         user.identifiers.some((id: any) => data.identifiers[id]?.identifiers),
     );
   }
-
-  // public async addRootOfTrust(configJson: any): Promise<Response> {
-  //   const rootOfTrustMultisigIdentifierName = configJson.users
-  //     .filter(
-  //       (usr: any) => usr.type == "GLEIF" || usr.type == "GLEIF_EXTERNAL",
-  //     )[0]
-  //     .identifiers.filter((identifier: string) =>
-  //       identifier.includes("multisig"),
-  //     )![0];
-
-  //   const rootOfTrustIdentifierName = configJson.users
-  //     .filter(
-  //       (usr: any) => usr.type == "GLEIF" || usr.type == "GLEIF_EXTERNAL",
-  //     )[0]
-  //     .identifiers.filter(
-  //       (identifier: string) => !identifier.includes("multisig"),
-  //     )![0];
-
-  //   const rootOfTrustIdentifierAgent =
-  //     configJson.agents[
-  //       configJson.identifiers[rootOfTrustIdentifierName].agent
-  //     ];
-  //   const rootOfTrustIdentifierSecret =
-  //     configJson.secrets[rootOfTrustIdentifierAgent.secret];
-  //   const clients = await getOrCreateClients(
-  //     1,
-  //     [rootOfTrustIdentifierSecret],
-  //     true,
-  //   );
-  //   const client = clients[clients.length - 1];
-  //   const rootOfTrustAid = await client
-  //     .identifiers()
-  //     .get(rootOfTrustMultisigIdentifierName);
-
-  //   const oobi = await client
-  //     .oobis()
-  //     .get(rootOfTrustMultisigIdentifierName, "agent");
-  //   let oobiUrl = oobi.oobis[0];
-  //   const url = new URL(oobiUrl);
-  //   if (url.hostname === "keria")
-  //     oobiUrl = oobiUrl.replace("keria", "localhost");
-  //   console.log(`Root of trust OOBI: ${oobiUrl}`);
-  //   // console.log(`OobiUrl: ${oobiUrl}`);
-  //   // if (url.hostname === "keria")
-  //   //   oobiUrl = oobiUrl.replace("keria", "host.docker.internal");
-  //   // if (process.env.KERIA_AGENT_PORT) {
-  //   //   oobiUrl = oobiUrl.replace("3902", process.env.KERIA_AGENT_PORT);
-  //   // }
-  //   // console.log(`OobiUrl: ${oobiUrl}`);
-  //   const oobiResp = await fetch(oobiUrl);
-  //   const oobiRespBody = await oobiResp.text();
-  //   const heads = new Headers();
-  //   heads.set("Content-Type", "application/json");
-  //   let lbody = {
-  //     vlei: oobiRespBody,
-  //     aid: rootOfTrustAid.prefix,
-  //     oobi: oobiUrl,
-  //   };
-  //   let lreq = {
-  //     headers: heads,
-  //     method: "POST",
-  //     body: JSON.stringify(lbody),
-  //   };
-  //   const lurl = `${this.apiBaseUrl}/add_root_of_trust`;
-  //   const lresp = await fetch(lurl, lreq);
-  //   return lresp;
-  // }
 
   public async addRootOfTrust(configJson: any): Promise<Response> {
     if (this.hasGLEIFWithMultisig(configJson)) {

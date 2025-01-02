@@ -42,13 +42,20 @@ function generateDockerfiles(
     const keriaUrl = `http://127.0.0.1:${baseKeriaUrl + (i - 1) * 10}`;
     const keriaBootUrl = `http://127.0.0.1:${baseKeriaBootUrl + (i - 1) * 10}`;
     // const apiBaseUrl = process.env.REG_PILOT_API;
+    // const filerBaseUrl = process.env.REG_PILOT_FILER;
+    // ENV TEST_ENVIRONMENT=${process.env.TEST_ENVIRONMENT}
+    // ENV REG_PILOT_FILER=${filerBaseUrl}
+    // ENV REG_PILOT_API=${apiBaseUrl}
 
     const dockerfileContent = `
   # Use a base image with the correct platform
   FROM node:20-alpine AS base
   WORKDIR /signify-ts-test
   COPY ../signify-ts-test .
-  RUN npm i
+   
+  # Update npm to the latest version
+  RUN npm install -g npm@latest
+  RUN npm install --legacy-peer-deps
   
   RUN npm run build
   ENV BANK_NAME=${bankName}
