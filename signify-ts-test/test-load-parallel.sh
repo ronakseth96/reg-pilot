@@ -427,15 +427,16 @@ run_api_test() {
                     --network host \
                     -e TEST_ENVIRONMENT="$TEST_ENVIRONMENT" \
                     -e REG_PILOT_API="$REG_PILOT_API" \
-                    -e REG_PILOT_FILER="${REG_PILOT_FILER:-}" \
+                    -e REG_PILOT_FILER="$REG_PILOT_FILER" \
                     --name $BANK_IMAGE_TAG $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1      
             # docker run --network host -e REG_PILOT_API="$REG_PILOT_API" --name $BANK_IMAGE_TAG $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
             else
                 docker run \
-                    -network host \
+                    --network host \
                     -e REG_PILOT_API="$REG_PILOT_API" \
-                    -e REG_PILOT_FILER="${REG_PILOT_FILER:-}" \
+                    -e REG_PILOT_FILER="$REG_PILOT_FILER" \
                     --name $BANK_IMAGE_TAG $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
+            fi
         else    
             docker run --network host --name $BANK_IMAGE_TAG $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > "$LOG_FILE" 2>&1
         fi
