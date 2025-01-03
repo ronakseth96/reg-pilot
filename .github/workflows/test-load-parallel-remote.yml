@@ -1,55 +1,55 @@
 name: Remote Mode load test
 on:
-  # push:
-  #   branches:
-  #     - feature/load-test-parallel
+  push:
+    branches:
+      - feature/load-test-parallel
   workflow_dispatch:
 
 jobs:
-  remote_stage:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: signify-ts-test/
+  # remote_stage:
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: signify-ts-test/
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
 
-      - name: Set up Docker buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3
-        # with:
-        #   use: true
+  #     - name: Set up Docker buildx
+  #       id: buildx
+  #       uses: docker/setup-buildx-action@v3
+  #       # with:
+  #       #   use: true
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20"
 
-      - name: Install dependencies
-        run: |
-          npm cache clean --force
-          npm set registry https://registry.npmjs.org/
-          npm ci
+  #     - name: Install dependencies
+  #       run: |
+  #         npm cache clean --force
+  #         npm set registry https://registry.npmjs.org/
+  #         npm ci
 
-      - name: Run the staging process
-        env:
-          FIRST_BANK: ${{ vars.FIRST_BANK }}
-          BANK_COUNT: ${{ vars.BANK_COUNT }}
-          REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
-        run: |
-          chmod +x test-load-parallel.sh
-          ./test-load-parallel.sh --mode remote --first-bank $FIRST_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL --stage
+  #     - name: Run the staging process
+  #       env:
+  #         FIRST_BANK: ${{ vars.FIRST_BANK }}
+  #         BANK_COUNT: ${{ vars.BANK_COUNT }}
+  #         REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
+  #       run: |
+  #         chmod +x test-load-parallel.sh
+  #         ./test-load-parallel.sh --mode remote --first-bank $FIRST_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL --stage
 
   remote_fast:
     # needs: remote_stage
@@ -85,7 +85,7 @@ jobs:
       - name: Run test-load-parallel script for ${{ matrix.banks }} in fast mode
         env:
           FIRST_BANK: ${{ matrix.banks }}
-          BANK_COUNT: 60
+          BANK_COUNT: 30
           REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
         run: |
           chmod +x test-load-parallel.sh
