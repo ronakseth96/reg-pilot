@@ -30,11 +30,11 @@ jobs:
 
           FIRST_BANKS_JSON=$(printf '%s\n' "${FIRST_BANKS[@]}" | jq -R . | jq -s .)
 
-          echo "banks=${FIRST_BANKS_JSON}" >> $GITHUB_ENV
+          echo "::set-output name=banks::$(echo $FIRST_BANKS_JSON)"
 
   remote_fast:
     needs: setup_matrix
-    name: bank ${{ matrix.first_bank }} sequence load test
+    name: bank ${{ matrix.banks }} sequence load test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
