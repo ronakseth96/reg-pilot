@@ -9,14 +9,40 @@ on:
   workflow_dispatch:
 
 jobs:
+  setup_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.setup_matrix.outputs.banks }}
+    steps:
+      - name: Set up matrix dynamic values
+        id: setup_matrix
+        run: |
+          TOTAL_BANKS=601
+          BANK_COUNT=40
+          JOBS=$((TOTAL_BANKS / BANK_COUNT))
+
+          # Calculate the first bank for each job
+          FIRST_BANKS=()
+          for i in $(seq 0 $((JOBS - 1))); do
+            START=$((i * BANK_COUNT + 1))
+            FIRST_BANKS+=($START)
+          done
+
+          echo "First banks: ${FIRST_BANKS[@]}"
+          echo "banks=${FIRST_BANKS[@]}" >> $GITHUB_ENV
+
   remote_fast:
-    name: bank ${{ matrix.first_bank }} to ${{ matrix.first_bank + env.BANK_COUNT - 1 }} load test
+    needs: setup_matrix
+    name: bank ${{ matrix.first_bank }} to ${{ matrix.first_bank + 39 }} load test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["ubuntu-latest"]
         node-version: ["20"]
-        banks: ${{ range(1, 85, 40) }}
+        # banks: [1, 41, 81, 121, 161, 201, 241, 281, 321, 341, 361, 401, 441, 481, 521, 561, 601]
+        # bank_count: [40]
+        banks: ${{ fromJson(needs.setup_matrix.outputs.banks) }}
+
     defaults:
       run:
         working-directory: signify-ts-test/
