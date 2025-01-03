@@ -19,17 +19,18 @@ jobs:
         run: |
           TOTAL_BANKS=601
           BANK_COUNT=40
-          JOBS=$((TOTAL_BANKS / BANK_COUNT))
+          JOBS=$(((TOTAL_BANKS + BANK_COUNT - 1) / BANK_COUNT))
 
           # Calculate the first bank for each job
           FIRST_BANKS=()
-          for i in $(seq 0 $((JOBS - 1))); do
+          for ((i = 0; i < JOBS; i++)); do
             START=$((i * BANK_COUNT + 1))
             FIRST_BANKS+=($START)
           done
 
-          echo "First banks: ${FIRST_BANKS[@]}"
-          echo "banks=${FIRST_BANKS[@]}" >> $GITHUB_ENV
+          FIRST_BANKS_JSON=$(printf '%s\n' "${FIRST_BANKS[@]}" | jq -R . | jq -s .)
+
+          echo "banks=${FIRST_BANKS_JSON}" >> $GITHUB_ENV
 
   remote_fast:
     needs: setup_matrix
