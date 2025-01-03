@@ -30,12 +30,13 @@ jobs:
               bank_count=$((TOTAL_BANKS - i))
             fi
             
-            banks+=("$first_bank:$bank_count")
+            # banks+=("$first_bank:$bank_count")
+            banks+=("{\"first_bank\": $first_bank, \"bank_count\": $bank_count}")
           done
 
-          echo "banks list: ${banks[@]}"
+          echo "banks json: [${banks[@]}]"
 
-          echo "banks=${banks[@]}" >> $GITHUB_ENV
+          echo "banks=[${banks[@]}]" >> $GITHUB_ENV
 
   remote_fast:
     needs: setup_matrix
