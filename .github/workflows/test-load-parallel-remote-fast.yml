@@ -33,7 +33,7 @@ jobs:
 
   remote_fast:
     needs: setup_matrix
-    name: bank ${{ matrix.first_bank }} to ${{ matrix.first_bank + 39 }} load test
+    name: bank ${{ matrix.first_bank }} sequence load test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
