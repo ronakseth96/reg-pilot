@@ -36,7 +36,7 @@ jobs:
 
           echo "banks json: [${banks[@]}]"
 
-          echo "banks=[${banks[@]}]" >> $GITHUB_ENV
+          echo "banks={\"include\":[${banks[@]}]}" >> $GITHUB_OUTPUT
 
   remote_fast:
     needs: setup_matrix
