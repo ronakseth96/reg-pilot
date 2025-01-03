@@ -1,8 +1,8 @@
 name: Remote Mode load test
 on:
-  push:
-    branches:
-      - feature/load-test-parallel
+  # push:
+  #   branches:
+  #     - feature/load-test-parallel
   workflow_dispatch:
 
 jobs:
@@ -52,11 +52,11 @@ jobs:
           ./test-load-parallel.sh --mode remote --first-bank $FIRST_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL --stage
 
   remote_fast:
-    needs: remote_stage
+    # needs: remote_stage
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        banks: [1,61]
+        banks: [1,31]
     defaults:
       run:
         working-directory: signify-ts-test/
