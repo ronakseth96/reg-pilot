@@ -371,12 +371,7 @@ build_api_docker_image() {
         docker build --platform linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
         # docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
     else 
-        # GitHub Actions: Build and push to Docker Hub
-        docker pull $BANK_API_TEST_REPO:$BANK_IMAGE_TAG
-        # docker pull $BANK_API_TEST_REPO:$BANK_IMAGE_TAG > /dev/null 2>&1
-
-        # docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ --push  > "$LOG_FILE" 2>&1
-
+        #docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ --push  > "$LOG_FILE" 2>&1
         docker buildx build \
             --platform linux/amd64,linux/arm64 \
             -f $BANK_DOCKERFILE \
@@ -384,8 +379,6 @@ build_api_docker_image() {
             --cache-to=type=registry,ref=$BANK_API_TEST_REPO:$BANK_IMAGE_TAG,mode=max \
             -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG \
             ../ --push 2>&1 | tee "$LOG_FILE"
-
-            # ../ --push > "$LOG_FILE" 2>&1
     fi
 
     BUILD_STATUS=$?
@@ -488,11 +481,20 @@ load_test_banks() {
 
     END_TIME=$(date +%s)
     ELAPSED_TIME=$((END_TIME - START_TIME))
+
+    if [[ "$(uname)" == "Darwin" ]]; then
+        START_TIME_STR=$(TZ="America/New_York" date -r "$START_TIME" '+%B %d, %Y %I:%M %p %Z')
+        END_TIME_STR=$(TZ="America/New_York" date -r "$END_TIME" '+%B %d, %Y %I:%M %p %Z')
+    else
+        START_TIME_STR=$(TZ="America/New_York" date -d "@$START_TIME" '+%B %d, %Y %I:%M %p %Z')
+        END_TIME_STR=$(TZ="America/New_York" date -d "@$END_TIME" '+%B %d, %Y %I:%M %p %Z')
+    fi
+
     echo "========================================================="
     echo "                   STAGING SUMMARY                       "
     echo "========================================================="
-    echo "START TIME         : $(TZ="America/New_York" date -r $START_TIME '+%B %d, %Y %I:%M %p %Z')"
-    echo "END TIME           : $(TZ="America/New_York" date -r $END_TIME '+%B %d, %Y %I:%M %p %Z')"
+    echo "START TIME         : $START_TIME_STR"
+    echo "END TIME           : $END_TIME_STR"
     echo "TOTAL BANKS STAGED : $BANK_COUNT"
     echo "TOTAL RUNTIME      : $((ELAPSED_TIME / 3600))h:$((ELAPSED_TIME % 3600 / 60))m:$((ELAPSED_TIME % 60))s"
     echo "=========================================================="
@@ -645,11 +647,19 @@ load_test_banks() {
             stop_services_local
     fi
 
+    if [[ "$(uname)" == "Darwin" ]]; then
+        START_TIME_STR=$(TZ="America/New_York" date -r "$START_TIME" '+%B %d, %Y %I:%M %p %Z')
+        END_TIME_STR=$(TZ="America/New_York" date -r "$END_TIME" '+%B %d, %Y %I:%M %p %Z')
+    else
+        START_TIME_STR=$(TZ="America/New_York" date -d "@$START_TIME" '+%B %d, %Y %I:%M %p %Z')
+        END_TIME_STR=$(TZ="America/New_York" date -d "@$END_TIME" '+%B %d, %Y %I:%M %p %Z')
+    fi  
+
     echo "========================================================="
     echo "                   TEST SUMMARY                          "
     echo "========================================================="
-    echo "START TIME         : $(TZ="America/New_York" date -r $START_TIME '+%B %d, %Y %I:%M %p %Z')"
-    echo "END TIME           : $(TZ="America/New_York" date -r $END_TIME '+%B %d, %Y %I:%M %p %Z')"
+    echo "START TIME         : $START_TIME_STR"
+    echo "END TIME           : $END_TIME_STR"
     echo "TOTAL BANKS TESTED : $BANK_COUNT test bank logins/uploads"
     echo "SUCCESS COUNT      : $SUCCESS_COUNT"
     echo "FAILURE COUNT      : $FAILURE_COUNT"
