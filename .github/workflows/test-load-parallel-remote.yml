@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        banks: [1-2, 2-4]
+        banks: [1,3]
     defaults:
       run:
         working-directory: signify-ts-test/
@@ -84,7 +84,7 @@ jobs:
 
       - name: Run test-load-parallel script for ${{ matrix.banks }} in fast mode
         env:
-          FIRST_BANK: ${{ matrix.banks.split('-')[0] }}
+          FIRST_BANK: ${{ matrix.banks }}
           BANK_COUNT: 2
           REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
         run: |
