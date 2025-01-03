@@ -54,6 +54,9 @@ jobs:
   remote_fast:
     needs: remote_stage
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        banks: [1-2, 2-4]
     defaults:
       run:
         working-directory: signify-ts-test/
@@ -79,10 +82,10 @@ jobs:
           npm set registry https://registry.npmjs.org/
           npm ci
 
-      - name: Run test-load-parallel script in fast mode
+      - name: Run test-load-parallel script for ${{ matrix.banks }} in fast mode
         env:
-          FIRST_BANK: ${{ vars.FIRST_BANK }}
-          BANK_COUNT: ${{ vars.BANK_COUNT }}
+          FIRST_BANK: ${{ matrix.banks.split('-')[0] }}
+          BANK_COUNT: 2
           REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
         run: |
           chmod +x test-load-parallel.sh
