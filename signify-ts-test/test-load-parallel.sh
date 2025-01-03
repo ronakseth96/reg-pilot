@@ -376,7 +376,6 @@ build_api_docker_image() {
             --platform linux/amd64,linux/arm64 \
             -f $BANK_DOCKERFILE \
             --cache-from=type=registry,ref=$BANK_API_TEST_REPO:$BANK_IMAGE_TAG \
-            --cache-to=type=registry,ref=$BANK_API_TEST_REPO:$BANK_IMAGE_TAG,mode=max \
             -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG \
             ../ --push 2>&1 | tee "$LOG_FILE"
     fi
