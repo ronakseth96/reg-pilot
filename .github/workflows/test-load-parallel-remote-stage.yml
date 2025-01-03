@@ -1,0 +1,58 @@
+name: Remote Mode Stage Job
+on:
+  push:
+    branches:
+      - "feature/load-test-parallel"
+  pull_request:
+    branches:
+      - "feature/load-test-parallel"
+  workflow_dispatch:
+
+jobs:
+  remote_stage:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ["ubuntu-latest"]
+        node-version: ["20"]
+        first_bank: [121,241]
+    defaults:
+      run:
+        working-directory: signify-ts-test/
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: |
+          npm cache clean --force
+          npm set registry https://registry.npmjs.org/
+          npm ci
+
+      - name: Run the staging process
+        env:
+          FIRST_BANK: ${{ matrix.first_bank }}
+          BANK_COUNT: 120
+          REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
+        run: |
+          chmod +x test-load-parallel.sh
+          ./test-load-parallel.sh --mode remote --first-bank $FIRST_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL --stage
