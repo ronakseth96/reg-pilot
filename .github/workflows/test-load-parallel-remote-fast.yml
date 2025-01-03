@@ -33,6 +33,8 @@ jobs:
             banks+=("$first_bank:$bank_count")
           done
 
+          echo "banks list: ${banks[@]}"
+
           echo "banks=${banks[@]}" >> $GITHUB_ENV
 
   remote_fast:
