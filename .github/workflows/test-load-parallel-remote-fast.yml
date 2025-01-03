@@ -30,7 +30,7 @@ jobs:
 
           FIRST_BANKS_JSON=$(printf '%s\n' "${FIRST_BANKS[@]}" | jq -R . | jq -s .)
 
-          echo "::set-output name=banks::$(echo $FIRST_BANKS_JSON)"
+          echo "banks=${FIRST_BANKS_JSON}" >> $GITHUB_OUTPUT
 
   remote_fast:
     needs: setup_matrix
