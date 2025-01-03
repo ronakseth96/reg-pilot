@@ -19,22 +19,25 @@ jobs:
         run: |
           TOTAL_BANKS=601
           BANK_COUNT=40
-          JOBS=$(((TOTAL_BANKS + BANK_COUNT - 1) / BANK_COUNT))
 
-          # Calculate the first bank for each job
-          FIRST_BANKS=()
-          for ((i = 0; i < JOBS; i++)); do
-            START=$((i * BANK_COUNT + 1))
-            FIRST_BANKS+=($START)
+          banks=()
+          for ((i = 0; i < TOTAL_BANKS; i+=BANK_COUNT)); do
+            first_bank=$((i + 1))
+            bank_count=$((BANK_COUNT))
+            
+            # For the last bank, adjust the count if it exceeds total banks
+            if ((i + BANK_COUNT > TOTAL_BANKS)); then
+              bank_count=$((TOTAL_BANKS - i))
+            fi
+            
+            banks+=("$first_bank:$bank_count")
           done
 
-          FIRST_BANKS_JSON=$(printf '%s\n' "${FIRST_BANKS[@]}" | jq -R . | jq -s .)
-
-          echo "banks=${FIRST_BANKS_JSON}" >> $GITHUB_OUTPUT
+          echo "banks=${banks[@]}" >> $GITHUB_ENV
 
   remote_fast:
     needs: setup_matrix
-    name: bank ${{ matrix.banks }} sequence load test
+    name: bank ${{ matrix.first_bank }} sequence load test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -43,7 +46,6 @@ jobs:
         # banks: [1, 41, 81, 121, 161, 201, 241, 281, 321, 341, 361, 401, 441, 481, 521, 561, 601]
         # bank_count: [40]
         banks: ${{ fromJson(needs.setup_matrix.outputs.banks) }}
-
     defaults:
       run:
         working-directory: signify-ts-test/
@@ -71,8 +73,8 @@ jobs:
 
       - name: Run test-load-parallel script for ${{ matrix.banks }} in fast mode
         env:
-          FIRST_BANK: ${{ matrix.banks }}
-          BANK_COUNT: 40
+          FIRST_BANK: ${{ matrix.first_bank }}
+          BANK_COUNT: ${{ matrix.bank_count }}
           REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
         run: |
           chmod +x test-load-parallel.sh
