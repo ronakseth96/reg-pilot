@@ -1,15 +1,16 @@
 name: Remote Mode Stage Job
 on:
-  push:
-    branches:
-      - "feature/load-test-parallel"
-  pull_request:
-    branches:
-      - "feature/load-test-parallel"
+  # push:
+  #   branches:
+  #     - "feature/load-test-parallel"
+  # pull_request:
+  #   branches:
+  #     - "feature/load-test-parallel"
   workflow_dispatch:
 
 jobs:
   remote_stage:
+    name: Run load test using stage
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

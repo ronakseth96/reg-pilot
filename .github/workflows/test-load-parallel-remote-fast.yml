@@ -1,4 +1,4 @@
-name: Remote Mode load test
+name: Remote Mode Fast Job
 on:
   push:
     branches:
@@ -10,12 +10,13 @@ on:
 
 jobs:
   remote_fast:
+    name: Run load test using fast 
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["ubuntu-latest"]
         node-version: ["20"]
-        banks: [1, 51]
+        banks: [1, 41, 81, 121, 161, 201, 241, 281, 321, 341, 361, 401, 441, 481, 521, 561]
     defaults:
       run:
         working-directory: signify-ts-test/
@@ -44,7 +45,7 @@ jobs:
       - name: Run test-load-parallel script for ${{ matrix.banks }} in fast mode
         env:
           FIRST_BANK: ${{ matrix.banks }}
-          BANK_COUNT: 50
+          BANK_COUNT: 40
           REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
         run: |
           chmod +x test-load-parallel.sh
