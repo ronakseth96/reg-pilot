@@ -10,13 +10,13 @@ on:
 
 jobs:
   remote_fast:
-    name: Run load test using fast 
+    name: bank ${{ matrix.first_bank }} to ${{ matrix.first_bank + env.BANK_COUNT - 1 }} load test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["ubuntu-latest"]
         node-version: ["20"]
-        banks: [1, 41, 81, 121, 161, 201, 241, 281, 321, 341, 361, 401, 441, 481, 521, 561]
+        banks: ${{ range(1, 85, 40) }}
     defaults:
       run:
         working-directory: signify-ts-test/
