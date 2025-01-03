@@ -371,13 +371,13 @@ build_api_docker_image() {
         docker build --platform linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
         # docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ > "$LOG_FILE" 2>&1
     else 
-        #docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ --push  > "$LOG_FILE" 2>&1
-        docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            -f $BANK_DOCKERFILE \
-            --cache-from=type=registry,ref=$BANK_API_TEST_REPO:$BANK_IMAGE_TAG \
-            -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG \
-            ../ --push 2>&1 | tee "$LOG_FILE"
+        docker buildx build --platform linux/amd64,linux/arm64 -f $BANK_DOCKERFILE -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG ../ --push  > "$LOG_FILE" 2>&1
+    #     docker buildx build \
+    #         --platform linux/amd64,linux/arm64 \
+    #         -f $BANK_DOCKERFILE \
+    #         --cache-from=type=registry,ref=$BANK_API_TEST_REPO:$BANK_IMAGE_TAG \
+    #         -t $BANK_API_TEST_REPO:$BANK_IMAGE_TAG \
+    #         ../ --push 2>&1 | tee "$LOG_FILE"
     fi
 
     BUILD_STATUS=$?
