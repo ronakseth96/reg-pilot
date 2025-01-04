@@ -37,10 +37,16 @@ jobs:
           # banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
           banks_json=$(IFS=,; echo "[${banks[*]}]")
 
-          echo "Generated banks JSON: $banks_json"
+          # echo "Generated banks JSON: $banks_json"
+
+          echo "DEBUG: Banks Array: ${banks[@]}"
+          echo "DEBUG: Banks JSON: $banks_json"
 
           # echo "banks={\"include\":[${banks[@]}]}" >> $GITHUB_OUTPUT
-          echo "banks=$banks_json" >> $GITHUB_ENV
+          echo "banks=$banks_json" >> $GITHUB_OUTPUT
+
+      - name: Print the output value
+        run: |
           echo "banks=${{ steps.setup_matrix.outputs.banks }}"
 
   remote_fast:
