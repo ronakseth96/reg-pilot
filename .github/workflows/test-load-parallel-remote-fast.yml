@@ -41,6 +41,8 @@ jobs:
 
           echo "banks={\"include\":[${banks[@]}]}" >> $GITHUB_OUTPUT
 
+          echo "banks=${{ steps.setup_matrix.outputs.banks }}"
+
   remote_fast:
     needs: setup_matrix
     name: bank ${{ matrix.first_bank }} sequence load test
