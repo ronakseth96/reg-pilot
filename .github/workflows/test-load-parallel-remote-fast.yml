@@ -34,7 +34,10 @@ jobs:
             banks+=("{\"first_bank\": $first_bank, \"bank_count\": $bank_count}")
           done
 
-          echo "banks json: [${banks[@]}]"
+          # banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
+          banks_json=$(IFS=,; echo "[${banks[*]}]")
+
+          echo "Generated banks JSON: $banks_json"
 
           echo "banks={\"include\":[${banks[@]}]}" >> $GITHUB_OUTPUT
 
@@ -48,7 +51,7 @@ jobs:
         node-version: ["20"]
         # banks: [1, 41, 81, 121, 161, 201, 241, 281, 321, 341, 361, 401, 441, 481, 521, 561, 601]
         # bank_count: [40]
-        banks: ${{ fromJson(needs.setup_matrix.outputs.banks) }}
+        banks: ${{fromJson(needs.setup_matrix.outputs.banks)}}
     defaults:
       run:
         working-directory: signify-ts-test/
