@@ -33,7 +33,8 @@ jobs:
             banks+=("{\"first_bank\": $first_bank, \"bank_count\": $bank_count}")
           done
 
-          banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
+          # banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
+          banks_json='{"include":['"$(IFS=,; echo "${banks[*]}")"']}'
 
           echo "banks=${banks_json}" >> "$GITHUB_OUTPUT"
 
