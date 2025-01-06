@@ -51,7 +51,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
+      matrix:
+        ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
         # os: ["ubuntu-latest"]
         # node-version: ["20"]
         # banks: [1, 41, 81, 121, 161, 201, 241, 281, 321, 341, 361, 401, 441, 481, 521, 561, 601]
@@ -62,14 +63,6 @@ jobs:
         working-directory: signify-ts-test/
 
     steps:
-      - name: Debug Matrix Values
-        run: |
-          echo "First Bank: ${{ matrix.first_bank }}"
-          echo "Bank Count: ${{ matrix.bank_count }}"
-          echo "Last Bank: ${{ matrix.last_bank }}"
-          echo "OS: ${{ matrix.os }}"
-          echo "Node Version: ${{ matrix.node-version }}"
-
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -89,6 +82,14 @@ jobs:
           npm cache clean --force
           npm set registry https://registry.npmjs.org/
           npm ci
+
+      - name: Matrix Values
+        run: |
+          echo "FIRST BANK: ${{ matrix.first_bank }}"
+          echo "BANK COUNT: ${{ matrix.bank_count }}"
+          echo "LAST BANK: ${{ matrix.last_bank }}"
+          echo "OS: ${{ matrix.os }}"
+          echo "NODE VERSION: ${{ matrix.node-version }}"
 
       - name: Run test-load-parallel script for ${{ matrix.first_bank }} to ${{ matrix.last_bank }} in fast mode
         env:
