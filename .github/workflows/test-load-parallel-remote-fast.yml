@@ -33,16 +33,15 @@ jobs:
             banks+=("{\"first_bank\": $first_bank, \"bank_count\": $bank_count}")
           done
 
-          # banks_json='{"include":['"$(echo "${banks[@]}" | jq -r @join(\',\'))"']}' 
-          # banks_json=$(printf '{"include":[%s]}' "$(IFS=,; echo "${banks[*]}")")
-          # banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
-          banks_json='{"include":['"$(IFS=,; echo "${banks[*]}")"']}' 
+          banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
 
           echo "banks=${banks_json}" >> "$GITHUB_OUTPUT"
 
       - name: Print the output value
+        env:
+          banks_output: ${{ steps.setup_matrix.outputs.banks }}
         run: |
-          echo "banks=${{ steps.setup_matrix.outputs.banks }}"
+          echo "$banks_output"
 
   remote_fast:
     needs: setup_matrix
@@ -54,7 +53,7 @@ jobs:
         node-version: ["20"]
         # banks: [1, 41, 81, 121, 161, 201, 241, 281, 321, 341, 361, 401, 441, 481, 521, 561, 601]
         # bank_count: [40]
-        banks: ${{ fromJson(needs.setup_matrix.outputs.matrix).include }}
+        include: ${{ fromJson(needs.setup_matrix.outputs.matrix).include }}
     defaults:
       run:
         working-directory: signify-ts-test/
@@ -80,7 +79,7 @@ jobs:
           npm set registry https://registry.npmjs.org/
           npm ci
 
-      - name: Run test-load-parallel script for ${{ matrix.banks }} in fast mode
+      - name: Run test-load-parallel script for ${{ matrix.first_bank }} to ${{ matrix.bank_count }} in fast mode
         env:
           FIRST_BANK: ${{ matrix.first_bank }}
           BANK_COUNT: ${{ matrix.bank_count }}
