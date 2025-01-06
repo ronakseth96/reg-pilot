@@ -184,7 +184,7 @@ validate_inputs() {
             # Check for images in Docker Hub
             for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
                 BANK_NAME="Bank_$i"
-                BANK_IMAGE_TAG="$(echo "$BANK_NAME" | tr '[:upper:]' '[:lower:]')_api_test:latest"
+                BANK_IMAGE_TAG="$(echo "$BANK_NAME" | tr '[:upper:]' '[:lower:]')_api_test"
                 IMAGE_NAME="$BANK_API_TEST_REPO:$BANK_IMAGE_TAG" 
 
                 if ! docker manifest inspect "$IMAGE_NAME" &> /dev/null; then 

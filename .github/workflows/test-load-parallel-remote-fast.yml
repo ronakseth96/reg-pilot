@@ -17,7 +17,7 @@ jobs:
       - name: Set up matrix dynamic values
         id: setup_matrix
         run: |
-          TOTAL_BANKS=81
+          TOTAL_BANKS=360
           BANK_COUNT=40
 
           banks=()
@@ -35,7 +35,6 @@ jobs:
             banks+=("{\"first_bank\": $first_bank, \"bank_count\": $bank_count, \"last_bank\": $last_bank, \"os\": \"ubuntu-latest\", \"node-version\": \"20\"}")
           done
 
-          # banks_json='{"include":['"$(IFS=,; echo "${banks[*]}")"']}'
           banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
           echo "banks=${banks_json}" >> "$GITHUB_OUTPUT"
 
