@@ -25,24 +25,16 @@ jobs:
             first_bank=$((i + 1))
             bank_count=$((BANK_COUNT))
             
-            # For the last bank, adjust the count if it exceeds total banks
+            # For the last bank, adjusting the count if it exceeds total banks
             if ((i + BANK_COUNT > TOTAL_BANKS)); then
               bank_count=$((TOTAL_BANKS - i))
             fi
             
-            # banks+=("$first_bank:$bank_count")
             banks+=("{\"first_bank\": $first_bank, \"bank_count\": $bank_count}")
           done
 
-          # banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
-          banks_json=$(IFS=,; echo "[${banks[*]}]")
+          banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
 
-          # echo "Generated banks JSON: $banks_json"
-
-          echo "DEBUG: Banks Array: ${banks[@]}"
-          echo "DEBUG: Banks JSON: $banks_json"
-
-          # echo "banks={\"include\":[${banks[@]}]}" >> $GITHUB_OUTPUT
           echo "banks=$banks_json" >> $GITHUB_OUTPUT
 
       - name: Print the output value
@@ -51,7 +43,7 @@ jobs:
 
   remote_fast:
     needs: setup_matrix
-    name: bank ${{ matrix.first_bank }} sequence load test
+    name: bank ${{ matrix.first_bank }}--${{ matrix.bank_count }} Load Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -59,7 +51,7 @@ jobs:
         node-version: ["20"]
         # banks: [1, 41, 81, 121, 161, 201, 241, 281, 321, 341, 361, 401, 441, 481, 521, 561, 601]
         # bank_count: [40]
-        banks: ${{fromJson(needs.setup_matrix.outputs.banks)}}
+        banks: ${{fromJson(needs.setup_matrix.outputs.banks).include}}
     defaults:
       run:
         working-directory: signify-ts-test/
