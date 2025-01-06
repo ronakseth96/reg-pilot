@@ -17,7 +17,7 @@ jobs:
       - name: Set up matrix dynamic values
         id: setup_matrix
         run: |
-          TOTAL_BANKS=601
+          TOTAL_BANKS=81
           BANK_COUNT=40
 
           banks=()
@@ -34,9 +34,9 @@ jobs:
           done
 
           # banks_json='{"include":['"$(echo "${banks[@]}" | jq -r @join(\',\'))"']}' 
-          banks_json=$(printf '{"include":[%s]}' "$(IFS=,; echo "${banks[*]}")")
+          # banks_json=$(printf '{"include":[%s]}' "$(IFS=,; echo "${banks[*]}")")
           # banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
-
+          banks_json='{"include":['"$(IFS=,; echo "${banks[*]}")"']}' 
 
           echo "banks=${banks_json}" >> "$GITHUB_OUTPUT"
 
