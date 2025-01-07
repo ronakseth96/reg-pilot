@@ -2,12 +2,12 @@ name: Remote Mode Fast Job
 on:
   schedule:
     - cron: "0 4 * * *"
-  push:
-    branches:
-      - "feature/load-test-parallel"
-  pull_request:
-    branches:
-      - "main"
+  # push:
+  #   branches:
+  #     - "feature/load-test-parallel"
+  # pull_request:
+  #   branches:
+  #     - "main"
   workflow_dispatch:
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
     env:
-      TOTAL_BANKS: 1
+      TOTAL_BANKS: 601
       BANK_COUNT: 40
     steps:
       - name: Generate bank matrix for parallel jobs
@@ -98,13 +98,13 @@ jobs:
       - name: Upload API test logs
         uses: actions/upload-artifact@v4
         with:
-          name: api-test-logs-${{ matrix.first_bank }}-${{ matrix.last_bank }}-${{ env.SHORT_SHA }}
+          name: api-test-logs-bank-${{ matrix.first_bank }}-bank-${{ matrix.last_bank }}-${{ env.SHORT_SHA }}
           path: ./signify-ts-test/bank_test_logs/api_test_logs/
           retention-days: 7
 
       - name: Upload Test Summary
         uses: actions/upload-artifact@v4
         with:
-          name: test-summary-${{ matrix.first_bank }}-${{ matrix.last_bank }}-${{ env.SHORT_SHA }}
+          name: test-summary-bank-${{ matrix.first_bank }}-bank-${{ matrix.last_bank }}-${{ env.SHORT_SHA }}
           path: ./signify-ts-test/bank_test_logs/test_summary.txt
           retention-days: 7
