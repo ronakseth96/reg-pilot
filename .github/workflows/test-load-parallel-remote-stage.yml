@@ -1,22 +1,60 @@
 name: Remote Mode Stage Job
 on:
-  # push:
-  #   branches:
-  #     - "feature/load-test-parallel"
-  # pull_request:
-  #   branches:
-  #     - "feature/load-test-parallel"
+  push:
+    branches:
+      - "feature/load-test-parallel"
+  pull_request:
+    branches:
+      - "main"
   workflow_dispatch:
 
 jobs:
-  remote_stage:
-    name: Run load test using stage
+  setup_matrix:
+    name: Set up Bank Matrix on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    outputs:
+      bank_matrix: ${{ steps.generate_matrix.outputs.banks }}
     strategy:
       matrix:
         os: ["ubuntu-latest"]
-        node-version: ["20"]
-        first_bank: [121,241]
+    env:
+      TOTAL_BANKS: 3
+      BANK_COUNT: 2
+    steps:
+      - name: Generate bank matrix for parallel jobs
+        id: generate_matrix
+        run: |
+          banks=()
+          for ((i = 0; i < TOTAL_BANKS; i+=BANK_COUNT)); do
+            first_bank=$((i + 1))
+            bank_count=$((BANK_COUNT))
+            
+            # For the last bank, adjusting the count if it exceeds total banks
+            if ((i + BANK_COUNT > TOTAL_BANKS)); then
+              bank_count=$((TOTAL_BANKS - i))
+            fi
+            
+            last_bank=$((first_bank + bank_count - 1))
+
+            banks+=("{\"first_bank\": $first_bank, \"bank_count\": $bank_count, \"last_bank\": $last_bank, \"os\": \"ubuntu-latest\", \"node-version\": \"20\"}")
+          done
+
+          banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
+          echo "banks=${banks_json}" >> "$GITHUB_OUTPUT"
+
+      - name: Generated matrix output
+        env:
+          GENERATED_MATRIX: ${{ steps.generate_matrix.outputs.banks }}
+        run: |
+          echo "$GENERATED_MATRIX"
+
+  run_stage:
+    needs: setup_matrix
+    name: Bank ${{ matrix.first_bank }}-${{ matrix.last_bank }} staging
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup_matrix.outputs.bank_matrix) }}
     defaults:
       run:
         working-directory: signify-ts-test/
@@ -52,8 +90,26 @@ jobs:
       - name: Run the staging process
         env:
           FIRST_BANK: ${{ matrix.first_bank }}
-          BANK_COUNT: 120
+          LAST_BANK: ${{ matrix.last_bank }}
+          BANK_COUNT: ${{ matrix.bank_count }}
           REMOTE_API_URL: ${{ vars.REMOTE_API_URL }}
         run: |
           chmod +x test-load-parallel.sh
           ./test-load-parallel.sh --mode remote --first-bank $FIRST_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL --stage
+
+      - name: Set short hash
+        run: echo "SHORT_SHA=${GITHUB_SHA:0:6}" >> $GITHUB_ENV
+
+      - name: Upload Docker build logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-build-logs-${{ env.SHORT_SHA }}
+          path: ./signify-ts-test/bank_test_logs/docker_build_logs/
+          retention-days: 7
+
+      - name: Upload Staging Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary-${{ env.SHORT_SHA }}
+          path: ./signify-ts-test/bank_test_logs/staging_summary.txt
+          retention-days: 7
