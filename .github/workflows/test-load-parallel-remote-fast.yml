@@ -92,19 +92,21 @@ jobs:
           chmod +x test-load-parallel.sh
           ./test-load-parallel.sh --mode remote --first-bank $FIRST_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL --fast
 
-      - name: List files in signify-ts-test
-        run: |
-          ls -R signify-ts-test/
-
-      - name: Check for logs and summary file
-        run: |
-          ls -R ./bank_test_logs
-
-      - name: Confirm directory structure
+      - name: List files
         run: |
           echo "Working directory: $(pwd)"
           echo "Listing files:"
-          ls -R ./signify-ts-test
+          ls -R
+
+      # - name: Check for logs and summary file
+      #   run: |
+      #     ls -R ./bank_test_logs
+
+      # - name: Confirm directory structure
+      #   run: |
+      #     echo "Working directory: $(pwd)"
+      #     echo "Listing files:"
+      #     ls -R ./signify-ts-test
 
       - name: Upload API test logs
         uses: actions/upload-artifact@v4
