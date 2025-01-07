@@ -489,6 +489,9 @@ load_test_banks() {
         END_TIME_STR=$(TZ="America/New_York" date -d "@$END_TIME" '+%B %d, %Y %I:%M %p %Z')
     fi
 
+    STAGING_SUMMARY_FILE="./bank_test_logs/staging_summary.txt"
+    mkdir -p $(dirname "$STAGING_SUMMARY_FILE")
+    {
     echo "========================================================="
     echo "                   STAGING SUMMARY                       "
     echo "========================================================="
@@ -497,6 +500,7 @@ load_test_banks() {
     echo "TOTAL BANKS STAGED : $BANK_COUNT"
     echo "TOTAL RUNTIME      : $((ELAPSED_TIME / 3600))h:$((ELAPSED_TIME % 3600 / 60))m:$((ELAPSED_TIME % 60))s"
     echo "=========================================================="
+    } | tee "$STAGING_SUMMARY_FILE"
     fi
 
     if [[ "$FAST_MODE" == true ]]; then
@@ -654,6 +658,9 @@ load_test_banks() {
         END_TIME_STR=$(TZ="America/New_York" date -d "@$END_TIME" '+%B %d, %Y %I:%M %p %Z')
     fi  
 
+    TEST_SUMMARY_FILE="./bank_test_logs/test_summary.txt"
+    mkdir -p $(dirname "$TEST_SUMMARY_FILE")
+    {
     echo "========================================================="
     echo "                   TEST SUMMARY                          "
     echo "========================================================="
@@ -665,6 +672,7 @@ load_test_banks() {
     echo "FAILED BANK(S)     : ${FAILED_BANKS[*]:-None}"
     echo "TOTAL RUNTIME      : $((ELAPSED_TIME / 3600))h:$((ELAPSED_TIME % 3600 / 60))m:$((ELAPSED_TIME % 60))s"
     echo "=========================================================="
+    } | tee "$TEST_SUMMARY_FILE"
     fi
 }
 
