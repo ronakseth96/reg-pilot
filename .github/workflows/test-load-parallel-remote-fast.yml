@@ -92,32 +92,20 @@ jobs:
           chmod +x test-load-parallel.sh
           ./test-load-parallel.sh --mode remote --first-bank $FIRST_BANK --bank-count $BANK_COUNT --api-url $REMOTE_API_URL --fast
 
-      - name: List files
-        run: |
-          echo "Working directory: $(pwd)"
-          echo "Listing files:"
-          ls -R
-
-      # - name: Check for logs and summary file
-      #   run: |
-      #     ls -R ./bank_test_logs
-
-      # - name: Confirm directory structure
-      #   run: |
-      #     echo "Working directory: $(pwd)"
-      #     echo "Listing files:"
-      #     ls -R ./signify-ts-test
+      - name: Set short hash
+        run: echo "SHORT_SHA=${GITHUB_SHA:0:6}" >> $GITHUB_ENV
 
       - name: Upload API test logs
+        run: |
         uses: actions/upload-artifact@v4
         with:
-          name: api-test-logs-${{ github.sha }}
+          name: api-test-logs-${{ env.SHORT_SHA }}
           path: ./signify-ts-test/bank_test_logs/api_test_logs/
           retention-days: 7
 
       - name: Upload Test Summary
         uses: actions/upload-artifact@v4
         with:
-          name: test-summary-${{ github.sha }}
-          path: ./signify-ts-test/test_summary.txt
+          name: test-summary-${{ env.SHORT_SHA }}
+          path: ./signify-ts-test/bank_test_logs/test_summary.txt
           retention-days: 7
