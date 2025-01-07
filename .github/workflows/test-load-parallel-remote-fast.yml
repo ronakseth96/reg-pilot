@@ -44,8 +44,11 @@ jobs:
           banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
           echo "banks=${banks_json}" >> "$GITHUB_OUTPUT"
 
-      - name: Generated matrix JSON
-        run: echo "${{ steps.generate_matrix.outputs.banks }}" | jq .
+      - name: Generated matrix output
+        env:
+          GENERATED_MATRIX: ${{ steps.generate_matrix.outputs.banks }}
+        run: |
+          echo "$GENERATED_MATRIX"
 
   run_load_test:
     needs: setup_matrix
