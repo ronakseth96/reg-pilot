@@ -1,25 +1,31 @@
 name: Remote Mode Fast Job
 on:
+  schedule:
+    - cron: "0 4 * * *"
   push:
     branches:
       - "feature/load-test-parallel"
   pull_request:
     branches:
-      - "feature/load-test-parallel"
+      - "main"
   workflow_dispatch:
 
 jobs:
   setup_matrix:
-    runs-on: ubuntu-latest
+    name: Set up Bank Matrix
+    runs-on: ${{ matrix.os }}
     outputs:
-      matrix: ${{ steps.setup_matrix.outputs.banks }}
+      bank_matrix: ${{ steps.generate_matrix.outputs.banks }}
+    strategy:
+      matrix:
+        os: ["ubuntu-latest"]
+    env:
+      TOTAL_BANKS: 41
+      BANK_COUNT: 40
     steps:
-      - name: Set up matrix dynamic values
-        id: setup_matrix
+      - name: Generate bank matrix for parallel jobs
+        id: generate_matrix
         run: |
-          TOTAL_BANKS=360
-          BANK_COUNT=40
-
           banks=()
           for ((i = 0; i < TOTAL_BANKS; i+=BANK_COUNT)); do
             first_bank=$((i + 1))
@@ -38,25 +44,16 @@ jobs:
           banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
           echo "banks=${banks_json}" >> "$GITHUB_OUTPUT"
 
-      - name: Print the output value
-        env:
-          banks_output: ${{ steps.setup_matrix.outputs.banks }}
-        run: |
-          echo "$banks_output"
+      - name: Generated matrix JSON
+        run: echo "${{ steps.generate_matrix.outputs.banks }}" | jq .
 
-  remote_fast:
+  run_load_test:
     needs: setup_matrix
     name: Bank ${{ matrix.first_bank }}-${{ matrix.last_bank }} Load Test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix:
-        ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
-        # os: ["ubuntu-latest"]
-        # node-version: ["20"]
-        # banks: [1, 41, 81, 121, 161, 201, 241, 281, 321, 341, 361, 401, 441, 481, 521, 561, 601]
-        # bank_count: [40]
-        # include: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.setup_matrix.outputs.bank_matrix) }}
     defaults:
       run:
         working-directory: signify-ts-test/
@@ -81,14 +78,6 @@ jobs:
           npm cache clean --force
           npm set registry https://registry.npmjs.org/
           npm ci
-
-      - name: Matrix Values
-        run: |
-          echo "FIRST BANK: ${{ matrix.first_bank }}"
-          echo "BANK COUNT: ${{ matrix.bank_count }}"
-          echo "LAST BANK: ${{ matrix.last_bank }}"
-          echo "OS: ${{ matrix.os }}"
-          echo "NODE VERSION: ${{ matrix.node-version }}"
 
       - name: Run test-load-parallel script for ${{ matrix.first_bank }} to ${{ matrix.last_bank }} in fast mode
         env:
