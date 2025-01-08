@@ -180,20 +180,20 @@ validate_inputs() {
             done
             echo "All Docker images validated successfully."
             
-        else
-            # Check for images in Docker Hub
-            for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
-                BANK_NAME="Bank_$i"
-                BANK_IMAGE_TAG="$(echo "$BANK_NAME" | tr '[:upper:]' '[:lower:]')_api_test"
-                IMAGE_NAME="$BANK_API_TEST_REPO:$BANK_IMAGE_TAG" 
+    #     else
+    #         # Check for images in Docker Hub
+    #         for ((i = FIRST_BANK; i <= LAST_BANK; i++)); do
+    #             BANK_NAME="Bank_$i"
+    #             BANK_IMAGE_TAG="$(echo "$BANK_NAME" | tr '[:upper:]' '[:lower:]')_api_test"
+    #             IMAGE_NAME="$BANK_API_TEST_REPO:$BANK_IMAGE_TAG" 
 
-                if ! docker manifest inspect "$IMAGE_NAME" &> /dev/null; then 
-                    echo "Image '$IMAGE_NAME' not found in Docker Hub."
-                    echo "Exiting due to missing Docker images. Rerun the staging process again to create missing images."
-                    exit 1
-                fi
-            done
-            echo "All Docker images validated successfully in Docker Hub."
+    #             if ! docker manifest inspect "$IMAGE_NAME" &> /dev/null; then 
+    #                 echo "Image '$IMAGE_NAME' not found in Docker Hub."
+    #                 echo "Exiting due to missing Docker images. Rerun the staging process again to create missing images."
+    #                 exit 1
+    #             fi
+    #         done
+    #         echo "All Docker images validated successfully in Docker Hub."
         fi
     fi    
 }
