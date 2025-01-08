@@ -1,7 +1,7 @@
 name: Local Mode Fast Job
 on:
   schedule:
-    - cron: "30 16 * * *"
+    - cron: "30 17 * * *"
   push:
     branches:
       - "feature/load-test-parallel"
@@ -17,8 +17,8 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
     env:
-      TOTAL_BANKS: 5
-      BANK_COUNT: 2
+      TOTAL_BANKS: 601
+      BANK_COUNT: 40
     steps:
       - name: Generate bank matrix for parallel jobs
         id: generate_matrix
