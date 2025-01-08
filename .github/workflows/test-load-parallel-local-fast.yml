@@ -1,7 +1,7 @@
 name: Local Mode Fast Job
 on:
   schedule:
-    - cron: "30 15 * * *"
+    - cron: "30 16 * * *"
   push:
     branches:
       - "feature/load-test-parallel"

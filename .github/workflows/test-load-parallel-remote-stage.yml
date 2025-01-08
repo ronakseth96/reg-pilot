@@ -1,11 +1,11 @@
 name: Remote Mode Stage Job
 on:
-  push:
-    branches:
-      - "feature/load-test-parallel"
-  pull_request:
-    branches:
-      - "main"
+  # push:
+  #   branches:
+  #     - "feature/load-test-parallel"
+  # pull_request:
+  #   branches:
+  #     - "main"
   workflow_dispatch:
 
 jobs:
