@@ -1,0 +1,106 @@
+name: Local Mode Fast Job
+on:
+  schedule:
+    - cron: "30 15 * * *"
+  push:
+    branches:
+      - "feature/load-test-parallel"
+  workflow_dispatch:
+
+jobs:
+  setup_matrix:
+    name: Set up Bank Matrix on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    outputs:
+      bank_matrix: ${{ steps.generate_matrix.outputs.banks }}
+    strategy:
+      matrix:
+        os: ["ubuntu-latest"]
+    env:
+      TOTAL_BANKS: 5
+      BANK_COUNT: 2
+    steps:
+      - name: Generate bank matrix for parallel jobs
+        id: generate_matrix
+        run: |
+          banks=()
+          for ((i = 0; i < TOTAL_BANKS; i+=BANK_COUNT)); do
+            first_bank=$((i + 1))
+            bank_count=$((BANK_COUNT))
+            
+            # For the last bank, adjusting the count if it exceeds total banks
+            if ((i + BANK_COUNT > TOTAL_BANKS)); then
+              bank_count=$((TOTAL_BANKS - i))
+            fi
+            
+            last_bank=$((first_bank + bank_count - 1))
+
+            banks+=("{\"first_bank\": $first_bank, \"bank_count\": $bank_count, \"last_bank\": $last_bank, \"os\": \"ubuntu-latest\", \"node-version\": \"20\"}")
+          done
+
+          banks_json="{\"include\":[$(IFS=,; echo "${banks[*]}")]}"
+          echo "banks=${banks_json}" >> "$GITHUB_OUTPUT"
+
+      - name: Generated matrix output
+        env:
+          GENERATED_MATRIX: ${{ steps.generate_matrix.outputs.banks }}
+        run: |
+          echo "$GENERATED_MATRIX"
+
+  run_load_test:
+    needs: setup_matrix
+    name: Bank ${{ matrix.first_bank }}-${{ matrix.last_bank }} Load Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup_matrix.outputs.bank_matrix) }}
+    defaults:
+      run:
+        working-directory: signify-ts-test/
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: |
+          npm cache clean --force
+          npm set registry https://registry.npmjs.org/
+          npm ci
+
+      - name: Run test-load-parallel script for ${{ matrix.first_bank }} to ${{ matrix.last_bank }} in fast mode
+        env:
+          FIRST_BANK: ${{ matrix.first_bank }}
+          LAST_BANK: ${{ matrix.last_bank }}
+          BANK_COUNT: ${{ matrix.bank_count }}
+        run: |
+          chmod +x test-load-parallel.sh
+          ./test-load-parallel.sh --mode local --first-bank $FIRST_BANK --bank-count $BANK_COUNT --fast
+
+      - name: Set short hash
+        run: echo "SHORT_SHA=${GITHUB_SHA:0:6}" >> $GITHUB_ENV
+
+      - name: Upload API test logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-logs-bank-${{ matrix.first_bank }}-bank-${{ matrix.last_bank }}-${{ env.SHORT_SHA }}
+          path: ./signify-ts-test/bank_test_logs/api_test_logs/
+          retention-days: 7
+
+      - name: Upload Test Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary-bank-${{ matrix.first_bank }}-bank-${{ matrix.last_bank }}-${{ env.SHORT_SHA }}
+          path: ./signify-ts-test/bank_test_logs/test_summary.txt
+          retention-days: 7
