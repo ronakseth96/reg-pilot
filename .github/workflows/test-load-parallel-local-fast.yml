@@ -2,9 +2,9 @@ name: Local Mode Fast Job
 on:
   schedule:
     - cron: "30 17 * * *"
-  push:
-    branches:
-      - "feature/load-test-parallel"
+  # push:
+  #   branches:
+  #     - "feature/load-test-parallel"
   workflow_dispatch:
 
 jobs:
