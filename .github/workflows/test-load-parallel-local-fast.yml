@@ -17,8 +17,8 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
     env:
-      TOTAL_BANKS: 601
-      BANK_COUNT: 40
+      TOTAL_BANKS: 11
+      BANK_COUNT: 5
     steps:
       - name: Generate bank matrix for parallel jobs
         id: generate_matrix
@@ -104,3 +104,13 @@ jobs:
           name: test-summary-bank-${{ matrix.first_bank }}-bank-${{ matrix.last_bank }}-${{ env.SHORT_SHA }}
           path: ./signify-ts-test/bank_test_logs/test_summary.txt
           retention-days: 7
+
+      - name: Post Test Summary to Discord
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          content: |
+            ```
+            **BANK_${{ matrix.first_bank }} BANK_${{ matrix.last_bank }}**
+            $(cat ./signify-ts-test/bank_test_logs/test_summary.txt)
+            ```

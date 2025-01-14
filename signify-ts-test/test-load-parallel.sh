@@ -408,6 +408,9 @@ run_api_test() {
     docker rm -f "$BANK_IMAGE_TAG" > /dev/null 2>&1
 
     echo "Running API test for $BANK_NAME..."
+
+    START_TIME=$(date +%s)
+
     if [[ "$(uname)" == "Darwin" ]]; then
         if [[ "$MODE" == "remote" ]]; then
             if [[ "$EBA" == "true" ]]; then
@@ -448,16 +451,56 @@ run_api_test() {
     fi
 
     API_TEST_STATUS=$?
+
+    END_TIME=$(date +%s)
+    ELAPSED_TIME=$((END_TIME - START_TIME))
+
     if [[ $API_TEST_STATUS -ne 0 ]]; then
         echo "API test for $BANK_NAME failed. See $LOG_FILE for details."
         tail -n 25 "$LOG_FILE"
         return 1
     else
         echo "API test for $BANK_NAME completed successfully."
+                echo "$BANK_NAME,$ELAPSED_TIME" >> "./bank_test_logs/timing_data.csv" 
     fi    
 
     docker rm "$BANK_IMAGE_TAG" > /dev/null 2>&1
     check_status "Removing container for $BANK_NAME"
+}
+
+process_timing_data() {
+    local TIMING_0_1=0
+    local TIMING_1_5=0
+    local TIMING_5PLUS=0
+    local TOTAL_TIME=0
+    local COUNT=0
+
+    while IFS="," read -r BANK_NAME ELAPSED_TIME; do
+    ((TOTAL_TIME+=ELAPSED_TIME))
+    ((COUNT++))
+
+        if [[ "$ELAPSED_TIME" -lt 60 ]]; then
+            ((TIMING_0_1++))
+        elif [[ "$ELAPSED_TIME" -ge 60 && "$ELAPSED_TIME" -lt 300 ]]; then
+            ((TIMING_1_5++))
+        else
+            ((TIMING_5PLUS++))
+        fi
+    done < "./bank_test_logs/timing_data.csv"
+
+    if [[ $COUNT -gt 0 ]]; then
+        local AVG_TIME=$(echo "scale=2; $TOTAL_TIME / $COUNT" | bc)
+        echo "========================================================="
+        echo "              TIMING DISTRIBUTION SUMMARY                "
+        echo "========================================================="
+        echo "LESS THAN 1 MIN    : $TIMING_0_1 bank(s)"
+        echo "1 TO 5 MINS        : $TIMING_1_5 bank(s)"
+        echo "MORE THAN 5 MINS   : $TIMING_5PLUS bank(s)"
+        echo "AVERAGE EXECUTION TIME FOR $COUNT bank(s) is $AVG_TIME seconds"
+        echo "---------------------------------------------------------"
+    else
+        echo "No data found in timing_data.csv"
+    fi
 }
 
 load_test_banks() {
@@ -499,7 +542,7 @@ load_test_banks() {
     echo "END TIME           : $END_TIME_STR"
     echo "TOTAL BANKS STAGED : $BANK_COUNT"
     echo "TOTAL RUNTIME      : $((ELAPSED_TIME / 3600))h:$((ELAPSED_TIME % 3600 / 60))m:$((ELAPSED_TIME % 60))s"
-    echo "=========================================================="
+    echo "========================================================="
     } | tee "$STAGING_SUMMARY_FILE"
     fi
 
@@ -511,6 +554,9 @@ load_test_banks() {
     echo "---------------------------------------------------"
     echo "Running API test for all banks"
     echo "---------------------------------------------------"
+
+    # Clear the timing_data file before starting api tests
+    > "./bank_test_logs/timing_data.csv" 
 
     START_TIME=$(date +%s)
     FAILED_BANKS=()
@@ -671,7 +717,8 @@ load_test_banks() {
     echo "FAILURE COUNT      : $FAILURE_COUNT"
     echo "FAILED BANK(S)     : ${FAILED_BANKS[*]:-None}"
     echo "TOTAL RUNTIME      : $((ELAPSED_TIME / 3600))h:$((ELAPSED_TIME % 3600 / 60))m:$((ELAPSED_TIME % 60))s"
-    echo "=========================================================="
+    process_timing_data 
+    echo "========================================================="
     } | tee "$TEST_SUMMARY_FILE"
     fi
 }
