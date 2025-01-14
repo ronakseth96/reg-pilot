@@ -105,7 +105,7 @@ jobs:
           path: ./signify-ts-test/bank_test_logs/test_summary.txt
           retention-days: 7
 
-      - name: Capture test summary report
+      - name: Capture Test Summary Report
         id: report
         run: |
           TEST_SUMMARY_LOG=$(cat ./bank_test_logs/test_summary.txt)
@@ -120,7 +120,6 @@ jobs:
           content: |
             ```
             =========================================================
-            BANK_${{ matrix.first_bank }} - BANK_${{ matrix.last_bank }}**
-            =========================================================
-            $(env.TEST_SUMMARY_LOG)
+            BANK_${{ matrix.first_bank }} - BANK_${{ matrix.last_bank }}
+            ${{ env.TEST_SUMMARY_LOG }}
             ```
