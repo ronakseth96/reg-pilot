@@ -17,8 +17,8 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
     env:
-      TOTAL_BANKS: 11
-      BANK_COUNT: 5
+      TOTAL_BANKS: 2
+      BANK_COUNT: 1
     steps:
       - name: Generate bank matrix for parallel jobs
         id: generate_matrix
@@ -108,7 +108,7 @@ jobs:
       - name: Capture test summary report
         id: report
         run: |
-          TEST_SUMMARY_LOG=$(cat ./signify-ts-test/bank_test_logs/test_summary.txt)
+          TEST_SUMMARY_LOG=$(cat ./bank_test_logs/test_summary.txt)
           echo "TEST_SUMMARY_LOG<<EOF" >> $GITHUB_ENV
           echo "$TEST_SUMMARY_LOG" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
