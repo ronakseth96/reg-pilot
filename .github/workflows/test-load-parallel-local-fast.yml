@@ -2,9 +2,9 @@ name: Local Mode Fast Job
 on:
   schedule:
     - cron: "0 3 * * *"
-  push:
-    branches:
-      - "feature/load-test-parallel"
+  # push:
+  #   branches:
+  #     - "feature/load-test-parallel"
   workflow_dispatch:
 
 jobs:
@@ -109,9 +109,7 @@ jobs:
         id: report
         run: |
           TEST_SUMMARY_LOG=$(cat ./bank_test_logs/test_summary.txt)
-          echo "TEST_SUMMARY_LOG<<EOF" >> $GITHUB_ENV
           echo "$TEST_SUMMARY_LOG" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
 
       - name: Post Test Summary to Discord
         uses: tsickert/discord-webhook@v6.0.0
