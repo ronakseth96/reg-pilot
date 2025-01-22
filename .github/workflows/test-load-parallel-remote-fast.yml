@@ -2,9 +2,9 @@ name: Remote Mode Fast Job
 on:
   schedule:
     - cron: "0 4 * * *"
-  # push:
-  #   branches:
-  #     - "feature/load-test-parallel"
+  push:
+    branches:
+      - "feature/load-test-parallel"
   # pull_request:
   #   branches:
   #     - "main"
@@ -20,7 +20,7 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
     env:
-      TOTAL_BANKS: 601
+      TOTAL_BANKS: 750
       BANK_COUNT: 40
     steps:
       - name: Generate bank matrix for parallel jobs
