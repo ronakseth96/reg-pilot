@@ -2,9 +2,9 @@ name: Remote Mode Fast Job
 on:
   schedule:
     - cron: "0 4 * * *"
-  # push:
-  #   branches:
-  #     - "feature/load-test-parallel"
+  push:
+    branches:
+      - "feature/load-test-parallel"
   # pull_request:
   #   branches:
   #     - "main"
