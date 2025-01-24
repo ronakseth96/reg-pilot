@@ -497,7 +497,6 @@ process_timing_data() {
         echo "1 TO 5 MINS        : $TIMING_1_5 bank(s)"
         echo "MORE THAN 5 MINS   : $TIMING_5PLUS bank(s)"
         echo "AVERAGE EXECUTION TIME FOR $COUNT bank(s) is $AVG_TIME seconds"
-        echo "---------------------------------------------------------"
     else
         echo "No data found in timing_data.csv"
     fi
