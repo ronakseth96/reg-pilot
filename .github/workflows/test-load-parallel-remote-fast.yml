@@ -131,4 +131,5 @@ jobs:
             =========================================================
             BANK_${{ matrix.first_bank }} - BANK_${{ matrix.last_bank }}
             ${{ env.TEST_SUMMARY_LOG }}
+            Artifact URL: ${{ env.ARTIFACT_URL }}
             ```
