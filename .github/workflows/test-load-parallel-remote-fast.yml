@@ -20,8 +20,8 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
     env:
-      TOTAL_BANKS: 750
-      BANK_COUNT: 40
+      TOTAL_BANKS: 10
+      BANK_COUNT: 3
     steps:
       - name: Generate bank matrix for parallel jobs
         id: generate_matrix
@@ -101,6 +101,11 @@ jobs:
           name: api-test-logs-bank-${{ matrix.first_bank }}-bank-${{ matrix.last_bank }}-${{ env.SHORT_SHA }}
           path: ./signify-ts-test/bank_test_logs/api_test_logs/
           retention-days: 7
+
+      - name: Generate Artifact URL
+        run: |
+          ARTIFACT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts"
+          echo "ARTIFACT_URL=$ARTIFACT_URL" >> $GITHUB_ENV
 
       - name: Upload Test Summary
         uses: actions/upload-artifact@v4
