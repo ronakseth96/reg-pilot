@@ -140,10 +140,5 @@ jobs:
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
           embed-title: "Test Results for Bank_${{ matrix.first_bank }} - Bank_${{ matrix.last_bank }}"
-          embed-description: |
-            ```
-            ${{ env.TEST_SUMMARY_LOG }}
-            For logs, check the [Artifact URL](${{ env.ARTIFACT_URL }}).
-            ```
-          # embed-color: 3066993
-          # embed-url: "Artifact URL (${{ env.ARTIFACT_URL }})"
+          embed-url: ${{ env.ARTIFACT_URL }}
+          embed-description: ${{ env.TEST_SUMMARY_LOG }}
