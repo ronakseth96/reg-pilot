@@ -122,35 +122,27 @@ jobs:
           echo "$TEST_SUMMARY_LOG" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: Post Test Summary to Discord
-        uses: tsickert/discord-webhook@v6.0.0
-        with:
-          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          content: |
-            ```
-            =========================================================
-            BANK_${{ matrix.first_bank }} - BANK_${{ matrix.last_bank }}
-            ${{ env.TEST_SUMMARY_LOG }}
-            Artifact URL: <${{ env.ARTIFACT_URL }}>
-            [View Artifact Logs]( ${{ env.ARTIFACT_URL }} )
-            ```
-
       # - name: Post Test Summary to Discord
       #   uses: tsickert/discord-webhook@v6.0.0
       #   with:
       #     webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-      #     embeds: |
-      #       [
-      #         {
-      #           "title": "Test Results for Bank ${{ matrix.first_bank }} - ${{ matrix.last_bank }}",
-      #           "description": "${{ env.TEST_SUMMARY_LOG }}",
-      #           "color": 3066993,
-      #           "fields": [
-      #             {
-      #               "name": "Artifact URL",
-      #               "value": "${{ env.ARTIFACT_URL }}",
-      #               "inline": true
-      #             }
-      #           ]
-      #         }
-      #       ]
+      #     content: |
+      #       ```
+      #       =========================================================
+      #       BANK_${{ matrix.first_bank }} - BANK_${{ matrix.last_bank }}
+      #       ${{ env.TEST_SUMMARY_LOG }}
+      #       Artifact URL: <${{ env.ARTIFACT_URL }}>
+      #       [View Artifact Logs]( ${{ env.ARTIFACT_URL }} )
+      #       ```
+
+      - name: Post Test Summary to Discord
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          embed-tile: "Test Results for Bank_${{ matrix.first_bank }} - Bank_${{ matrix.last_bank }}"
+          embed-description: |
+            ```
+            ${{ env.TEST_SUMMARY_LOG }}
+            ```
+          embed-color: 3066993
+          embed-footer-text: "Artifact URL [click here](${{ env.ARTIFACT_URL }})"
