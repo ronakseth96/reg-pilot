@@ -143,6 +143,7 @@ jobs:
           embed-description: |
             ```
             ${{ env.TEST_SUMMARY_LOG }}
+            For logs, check the [Artifact URL](${{ env.ARTIFACT_URL }}).
             ```
           # embed-color: 3066993
-          embed-url: "Artifact URL (${{ env.ARTIFACT_URL }})"
+          # embed-url: "Artifact URL (${{ env.ARTIFACT_URL }})"
